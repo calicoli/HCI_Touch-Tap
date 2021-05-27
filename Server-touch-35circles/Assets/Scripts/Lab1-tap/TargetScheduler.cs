@@ -70,7 +70,7 @@ public class TargetScheduler : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        curTrialIndex = 1;
+        curTrialIndex = 0;
 
         // target1 set
         arrayRemainTargets1.Clear();
@@ -99,7 +99,7 @@ public class TargetScheduler : MonoBehaviour
         Debug.Log("cnt 1/2: " + arrayRemainTargets1.Count + "/" + arrayRemainTargets2.Count);
         resetAllCubes1();
         //resetAllCube2(); do this in client
-        scheduleTargets();
+        // scheduleTargets(); let TrialController to control targets-scheduler
     }
 
     // Update is called once per frame
@@ -118,29 +118,60 @@ public class TargetScheduler : MonoBehaviour
         }
     }
 
-    void scheduleTargets()
+    void scheduleTargets(bool isPortrait)
     {
         int idx = curTrialIndex;
-        int id1 = randomTargetId(1);
-        int id2 = randomTargetId(2);
+        /*
+         * int id1 = randomTargetId(1);
+         * int id2 = randomTargetId(2);
+         */
+        int id1, id2;
+        randomTargetId(out id1, out id2);
         int ids = 0;
 #if UNITY_ANDROID && UNITY_EDITOR
         ids = columnCnt * (rowCnt - 1);
 #endif
 #if UNITY_IOS || UNITY_ANDROID
-        if (Input.deviceOrientation == DeviceOrientation.LandscapeLeft ||
-            Input.deviceOrientation == DeviceOrientation.LandscapeRight )
+        if (isPortrait)
         {
-            
-            ids = rowCnt * (columnCnt - 1);
+            ids = columnCnt * (rowCnt - 1);
         }
         else
         {
-            ids = columnCnt * (rowCnt - 1);
+            ids = rowCnt * (columnCnt - 1);
         }
 #endif
         trials[curTrialIndex].setParams(idx, ids, id1, id2);
         trials[curTrialIndex].printParams();
+    }
+
+    void randomTargetId(out int id1, out int id2)
+    {
+        id1 = -2;
+        id2 = -2;
+        System.Random rd = new System.Random();
+        if (arrayRemainTargets1.Count > 0)
+        {
+            int rdnum = rd.Next(0, arrayRemainTargets1.Count);
+            id1 = Convert.ToInt32(arrayRemainTargets1[rdnum]);
+            cubes1[id1].remainTouchCnt--;
+            if (cubes1[id1].remainTouchCnt <= 0)
+            {
+                arrayRemainTargets1.Remove(id1);
+            }
+            Debug.Log("arrayCount1/rdnum/id/cntTouch: " + arrayRemainTargets1.Count + " / " + rdnum + " / " + id1 + " / " + cubes1[id1].remainTouchCnt);
+        }
+
+        if (arrayRemainTargets2.Count > 0)
+        {
+            int rdnum = rd.Next(0, arrayRemainTargets2.Count);
+            id2 = Convert.ToInt32(arrayRemainTargets2[rdnum]);
+            if (cubes2[id2] <= 0)
+            {
+                arrayRemainTargets2.Remove(id2);
+            }
+            Debug.Log("arrayCount2/rdnum/id/cntTouch: " + arrayRemainTargets2.Count + " / " + rdnum + " / " + id2 + " / " + cubes2[id2]);
+        }
     }
 
     int randomTargetId(int num)
@@ -180,7 +211,7 @@ public class TargetScheduler : MonoBehaviour
         }
         return -2;
     }
-
+    #region public method
     public void updateStartBtn(bool isActive)
     {
         if(isActive)
@@ -202,7 +233,11 @@ public class TargetScheduler : MonoBehaviour
     public void increaseTrialIndex()
     {
         curTrialIndex++;
-        scheduleTargets();
+        
+    }
+    public void scheduleNewTrial(bool isPortrait)
+    {
+        scheduleTargets(isPortrait);
     }
 
     public int getCurrentTarget1id()
@@ -214,4 +249,5 @@ public class TargetScheduler : MonoBehaviour
     {
         return trials[curTrialIndex].secondid;
     }
+    #endregion
 }

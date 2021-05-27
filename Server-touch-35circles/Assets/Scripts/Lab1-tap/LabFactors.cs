@@ -21,8 +21,8 @@ public class LabFactors : MonoBehaviour
         convex = 1
     }
 
-    public float[] AngleBetweenScreens = { 60, 90, 120, 150 };
-    public float[] TargetSize = { 1 };
+    public static float[] AngleBetweenScreens = { 60, 90, 120, 150 };
+    public static float[] TargetSize = { 1 };
 
     // Start is called before the first frame update
     void Start()
