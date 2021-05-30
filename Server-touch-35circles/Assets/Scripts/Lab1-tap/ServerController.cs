@@ -146,7 +146,7 @@ public class ServerController : MonoBehaviour
     private void getVector()
     {
         Debug.Log("S rcvMsg: " + receiveMsg);
-        string[] messages = receiveMsg.Split(',');
+        string[] messages = receiveMsg.Split(';');
 
         char refreshAngle = messages[0][0];
         char refreshTrial = messages[0][1];
@@ -165,12 +165,13 @@ public class ServerController : MonoBehaviour
             int cTrialPhase = System.Convert.ToInt32(messages[6]);
             int cTarget2id = System.Convert.ToInt32(messages[7]);
             bool cPhaseFinished = (messages[8][0] - 'T' == 0);
-            bool cPhaseSuccess = (messages[8][1] - 'T' == 0);
-
+            //bool cPhaseSuccess = (messages[8][1] - 'T' == 0);
+            string cTouch2data = messages[9];
             bool sendMessageToClientAgain = false;
             sendMessageToClientAgain = trialController.GetComponent<TrialController>().
-                checkClientTargetTouch(cLabName, cTrialIndex, cTrialPhase, cTarget2id, cPhaseFinished, cPhaseSuccess);
-            if (!sendMessageToClientAgain)
+                checkClientTargetTouch(cLabName, cTrialIndex, cTrialPhase, cTarget2id, 
+                cPhaseFinished, cTouch2data);
+            if (sendMessageToClientAgain)
             {
                 prepareNewMessage4Client(false, true);
             }

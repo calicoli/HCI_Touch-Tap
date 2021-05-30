@@ -2,22 +2,25 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FileProcessor : MonoBehaviour
 {
-    private string strWriteData;
+    //private string strWriteData;
 
     // Start is called before the first frame update
     void Start()
     {
-        string filename = "test.txt";
+        
+        string filename = "filtProcessor.txt";
         string originText = readStringFromFile(filename);
-        string writeText = originText + "\r\n" + strWriteData + "\r\n";
+        string writeText = originText + "\r\n" + originText + "\r\n";
         writeStringToFile(writeText, filename);
         string readText = readStringFromFile(filename);
         Debug.Log(readText);
-
+        /*
         strWriteData = null;
+        */
     }
 
     // Update is called once per frame
@@ -103,7 +106,7 @@ return null;
 
     public void setWriteData(string str)
     {
-        strWriteData = str;
+        //strWriteData = str;
     }
 
     public void writeNewDataToFile(string filename, string strContent, out bool writeFinished)

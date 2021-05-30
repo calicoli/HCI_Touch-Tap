@@ -6,7 +6,7 @@ using UnityEngine;
 public class TargetScheduler : MonoBehaviour
 {
 
-    const int repeatTime = 1;
+    const int repeatTime = 35;
     const int columnCnt= 5, rowCnt = 7;
     const int target1Cnt = 35, target2Cnt = 35;
 
@@ -86,7 +86,7 @@ public class TargetScheduler : MonoBehaviour
                 posCubes1[id1] = child.transform.position;
             }
         }
-        
+
         // target2 set
         arrayRemainTargets2.Clear();
         totalCubes2 = target2Cnt;
@@ -166,6 +166,7 @@ public class TargetScheduler : MonoBehaviour
         {
             int rdnum = rd.Next(0, arrayRemainTargets2.Count);
             id2 = Convert.ToInt32(arrayRemainTargets2[rdnum]);
+            cubes2[id2]--;
             if (cubes2[id2] <= 0)
             {
                 arrayRemainTargets2.Remove(id2);

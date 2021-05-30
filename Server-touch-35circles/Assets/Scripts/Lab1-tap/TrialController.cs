@@ -5,6 +5,9 @@ using UnityEngine;
 
 public class TrialController : MonoBehaviour
 {
+    const string curLabName = "Lab1-tap";
+    const int totalTrialTimes = 35 * 35;
+
     public GameObject serverController;
     public GameObject fileProcessor;
     public GameObject blockAssigner;
@@ -42,7 +45,8 @@ public class TrialController : MonoBehaviour
         public long t1ShowupStamp, t2ShowupStamp;
         public long tp0SuccessStamp, tp1SuccessStamp, tp2SuccessStamp;
         public Vector2 tp0SuccessPosition, tp1SuccessPosition, tp2SuccessPosition;
-        public ArrayList tp1FailPositions, tp2FailPositions;
+        public ArrayList tp1FailPositions;
+        public string tp2FailPositions;
         public long serverSendDataStamp, clientReceivedDataStamp;
         // calculate
         public bool isTrialSuccessWithNoError;
@@ -59,7 +63,7 @@ public class TrialController : MonoBehaviour
             tp1Count = 0;
             tp2Count = 0;
             tp1FailPositions = new ArrayList(); tp1FailPositions.Clear();
-            tp2FailPositions = new ArrayList(); tp2FailPositions.Clear();
+            tp2FailPositions = null;
         }
 
         public long calTimeSpan(long later, long earlier)
@@ -86,17 +90,23 @@ public class TrialController : MonoBehaviour
             calMoreData();
             Debug.Log("Part data: " + tp1Count.ToString() + tp2Count.ToString());
             string str;
+                // assign
             str = trialid.ToString() + ";" + firstid.ToString() + ";" + secondid.ToString() + ";"
+                // calculate
                 + isTrialSuccessWithNoError.ToString() + ";"
                 + isTarget1SuccessWithNoError.ToString() + ";" + isTarget2SuccessWithNoError.ToString() + ";"
                 + completeTime.ToString() + ";" + dataTransferTime.ToString() + ";"
                 + target1CompleteTime.ToString() + ";" + target2CompleteTime.ToString() + ";"
                 + target1ShowTime.ToString() + ";" + target2ShowTime.ToString() + ";"
+                // raw: success position
+                + tp1SuccessPosition.ToString() + ";" + tp2SuccessPosition + ";"
+                // raw: other data
+                + serverSendDataStamp.ToString() + ";" + clientReceivedDataStamp.ToString() + ";"
                 + tp0SuccessStamp.ToString() + ";" + tp0SuccessPosition.ToString() + ";"
-                + tp1Count.ToString() + ";" + t1ShowupStamp.ToString() + ";"
-                + tp1SuccessStamp.ToString() + ";" + tp1SuccessPosition.ToString() + ";"
-                + tp2Count.ToString() + ";" + t2ShowupStamp.ToString() + ";"
-                + tp2SuccessStamp.ToString() + ";" + tp2SuccessPosition + ";"
+                + tp1Count.ToString() + ";" 
+                + t1ShowupStamp.ToString() + ";" + tp1SuccessStamp.ToString() + ";" 
+                + tp2Count.ToString() + ";" 
+                + t2ShowupStamp.ToString() + ";" + tp2SuccessStamp.ToString() + ";" 
                 ;
             if(tp1Count > 1)
             {
@@ -104,22 +114,18 @@ public class TrialController : MonoBehaviour
                 {
                     str += tp1FailPositions[i].ToString() + "*";
                 }
+            } else
+            {
+                str += "T1NoError";
             }
             str += ";";
-            if(tp2Count > 1)
-            {
-                for (int i = 0; i < tp2FailPositions.Count; i++)
-                {
-                    str += tp2FailPositions[i].ToString() + "*";
-                }
-            }
+            str += (tp2Count > 1) ? tp2FailPositions : "T2NoError";
             str += ";";
             return str;
         }
     }
 
-    const string curLabName = "Lab1-tap";
-    const int totalTrialTimes = 25;
+    
     private int curTrialIndex;
     private TrialPhase prevTrialPhase = TrialPhase.end;
     private TrialPhase curTrialPhase;
@@ -235,7 +241,7 @@ public class TrialController : MonoBehaviour
                     haveObjectOnScreen = false;
                     curTrialPhase = TrialPhase.ready;
                 }
-                Debug.Log("Click the PC screen at " + Input.mousePosition.ToString() + moveToNextPhase.ToString());
+                //Debug.Log("Click the PC screen at " + Input.mousePosition.ToString() + moveToNextPhase.ToString());
             }
 #endif
         }
@@ -300,12 +306,8 @@ public class TrialController : MonoBehaviour
                 serverController.GetComponent<ServerController>().prepareNewMessage4Client(false, true);
 
                 curTrialPhase = TrialPhase.ongoing_p2;
+            }
 
-            }
-            else
-            {
-                curTrialPhase = TrialPhase.ongoing_p2;
-            }
         }
         else if (curTrialPhase == TrialPhase.ongoing_p2)
         {
@@ -313,10 +315,6 @@ public class TrialController : MonoBehaviour
             if (isConnecting && moveToNextPhase)
             {
                 clientSaidMoveon = false;
-                curTrialPhase = TrialPhase.ongoing_p3;
-            }
-            else if (!isConnecting)
-            {
                 curTrialPhase = TrialPhase.ongoing_p3;
             }
         }
@@ -402,19 +400,39 @@ public class TrialController : MonoBehaviour
         return(long)(DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000;
     }
 
+    void parseTouch2DataString(string cTouchMsg)
+    {
+        Debug.Log("Befor parse: " + cTouchMsg);
+        string[] messages = cTouchMsg.Split('#');
+        int cTrialIndex = System.Convert.ToInt32(messages[0]);
+        int cTarget2id = System.Convert.ToInt32(messages[1]);
+        if (cTrialIndex == curTrialIndex &&
+            cTarget2id == targetScheduler.GetComponent<TargetScheduler>().getCurrentTarget2id()
+            )
+        {
+            trialData.clientReceivedDataStamp = System.Convert.ToInt64(messages[2]);
+            trialData.tp2Count = System.Convert.ToInt32(messages[3]);
+            trialData.t2ShowupStamp = System.Convert.ToInt64(messages[4]);
+            trialData.tp2SuccessStamp = System.Convert.ToInt64(messages[5]);
+            trialData.tp2SuccessPosition = 
+                new Vector2(System.Convert.ToSingle(messages[6]), System.Convert.ToSingle(messages[7]));
+            trialData.tp2FailPositions = messages[8];
+        }
+    }
+
 #region Public methods
     // check if server need to send message to client again
     public bool checkClientTargetTouch( string clientLabName,
         int cTrialIndex, int cTrialPhase, int cTarget2id, 
-        bool cPhaseFinished,bool cPhaseSuccess)
+        bool cPhaseFinished, string cTouch2data)
     {
         int curTarget2id = targetScheduler.GetComponent<TargetScheduler>().getCurrentTarget2id();
         if(string.Equals(clientLabName, curLabName) 
             && cTrialIndex == curTrialIndex && (cTrialPhase == (int)curTrialPhase) 
             && cTarget2id == curTarget2id)
         {
+            parseTouch2DataString(cTouch2data);
             clientSaidMoveon = cPhaseFinished;
-            // deal with cPhaseSuccess
             return false;
         }
         return true;
