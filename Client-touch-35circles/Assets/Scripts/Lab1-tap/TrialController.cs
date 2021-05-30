@@ -17,25 +17,82 @@ public class TrialController : MonoBehaviour
     private int curTrialIndex;
     public enum TrialPhase
     {
-        inactive = 0,
-        ready = 1,
-        ongoing_p1 = 21,
-        ongoing_p2 = 22,
-        ongoing_p3 = 23,
-        end = 3
+        start = 0,
+        awaiting = 1,
+        scheduling = 2,
+        inactive = 3,
+        ready = 4,
+        ongoing_p1 = 51,
+        ongoing_p2 = 52,
+        ongoing_p3 = 53,
+        server_output_data = 6,
+        end = 9
     }
+
+    public struct TrialData
+    {
+        // assgin
+        int trialid, secondid;
+        public int tp2Count;
+        public long t2ShowupStamp;
+        public long tp2SuccessStamp;
+        public Vector2 tp2SuccessPosition;
+        public ArrayList tp2FailPositions;
+        public long clientReceivedDataStamp;
+
+        public void init(int idx, int id2)
+        {
+            trialid = idx;
+            secondid = id2;
+            tp2Count = 0;
+            tp2FailPositions = new ArrayList();
+            tp2FailPositions.Clear();
+        }
+
+        public string getAllData()
+        {
+            Debug.Log("Part data: " + tp2Count.ToString());
+            string str;
+            str = trialid.ToString() + "#" + secondid.ToString() + "#"
+                + clientReceivedDataStamp + "#"
+                + tp2Count.ToString() + "#" + t2ShowupStamp.ToString() + "#"
+                + tp2SuccessStamp.ToString() + "#" 
+                + tp2SuccessPosition.x.ToString() + "#"
+                + tp2SuccessPosition.y.ToString() + "#"
+                ;
+            if (tp2Count > 1)
+            {
+                for (int i = 0; i < tp2FailPositions.Count; i++)
+                {
+                    str += tp2FailPositions[i].ToString() + "*";
+                }
+            }
+            else
+            {
+                str += " ";
+            }
+            str += "#";
+            Debug.Log("cTrialData: " + str);
+            return str;
+        }
+    }
+
     private TrialPhase prevTrialPhase = TrialPhase.end;
     private TrialPhase curTrialPhase;
 
-    bool serverRefreshData;
-    bool clientTouchSuccess;
+    private TrialData trialData;
+
+    private bool serverRefreshData;
+    private bool haveObjectOnScreen;
+    //private bool clientTouchSuccess;
 
     void Start()
     {
         inSameLabWithServer = false;
         isConnecting = false;
         serverRefreshData = false;
-        clientTouchSuccess = false;
+        haveObjectOnScreen = false;
+        //clientTouchSuccess = false;
         //connectBtn.SetActive(true);
         curTrialIndex = 0;
         curTrialPhase = TrialPhase.inactive;
@@ -53,38 +110,69 @@ public class TrialController : MonoBehaviour
                 prevTrialPhase = curTrialPhase;
             }
 
-            if (curTrialPhase == TrialPhase.inactive || curTrialPhase == TrialPhase.ready)
+            if (curTrialPhase == TrialPhase.start || curTrialPhase == TrialPhase.awaiting ||
+                curTrialPhase == TrialPhase.scheduling ||
+                curTrialPhase == TrialPhase.inactive || curTrialPhase == TrialPhase.ready
+                )
             {
                 // server is rensponsible for this phase
                 // client just go on
             }
             else if (curTrialPhase == TrialPhase.ongoing_p1)
             { 
-                if(serverRefreshData)
+                if(serverRefreshData || haveObjectOnScreen)
                 {
-                    
-                    targetScheduler.GetComponent<TargetScheduler>().updateTarget2(true);
-                    //bool moveToNextPhase; // depend on the task completive condition
+                    if(serverRefreshData)
+                    {
+                        serverRefreshData = false;
+                        targetScheduler.GetComponent<TargetScheduler>().updateTarget2(true);
+                        haveObjectOnScreen = true;
+                        trialData.t2ShowupStamp = CurrentTimeMillis();
+                    }
+#if UNITY_IOS || UNITY_ANDROID
                     if (Input.touchCount == 1)
                     {
                         Touch touch = Input.GetTouch(0);
                         if (touch.phase == TouchPhase.Ended)
                         {
+                            trialData.tp2Count++;
                             bool touchSuccess = process1Touch4Target2(touch.position);
-                            targetScheduler.GetComponent<TargetScheduler>().updateTarget2(false);
-                            curTrialPhase = TrialPhase.ongoing_p2;
-                            serverRefreshData = false;
+                            if(touchSuccess)
+                            {
+                                trialData.tp2SuccessStamp = CurrentTimeMillis();
+                                trialData.tp2SuccessPosition = touch.position;
+                                targetScheduler.GetComponent<TargetScheduler>().updateTarget2(false);
+                                haveObjectOnScreen = false;
+                                curTrialPhase = TrialPhase.ongoing_p2;
+                                
+                            } else
+                            {
+                                trialData.tp2FailPositions.Add(touch.position);
+                            }
+                            
                         }
                     }
-                    else if (Input.GetMouseButtonUp(0))
+#endif
+#if UNITY_ANDROID && UNITY_EDITOR
+                    if (Input.GetMouseButtonUp(0))
                     {
-                        bool touchSuccess = process1Touch4Target2(Input.mousePosition);
-                        clientTouchSuccess = touchSuccess;
-                        targetScheduler.GetComponent<TargetScheduler>().updateTarget2(false);
-                        curTrialPhase = TrialPhase.ongoing_p2;
-                        serverRefreshData = false;
+                        Vector2 pos = Input.mousePosition;
+                        trialData.tp2Count++;
+                        bool touchSuccess = process1Touch4Target2(pos);
+                        if(touchSuccess)
+                        {
+                            trialData.tp2SuccessStamp = CurrentTimeMillis();
+                            trialData.tp2SuccessPosition = pos;
+                            targetScheduler.GetComponent<TargetScheduler>().updateTarget2(false);
+                            haveObjectOnScreen = false;
+                            curTrialPhase = TrialPhase.ongoing_p2;
+                        } else
+                        {
+                            trialData.tp2FailPositions.Add(pos);
+                        }
+                        //clientTouchSuccess = touchSuccess;
                     }
-
+#endif
                 }
 
             }
@@ -93,7 +181,9 @@ public class TrialController : MonoBehaviour
                 clientController.GetComponent<ClientController>().prepareNewMessage4Server(false, true);
                 curTrialPhase = TrialPhase.ongoing_p3;
             }
-            else if (curTrialPhase == TrialPhase.ongoing_p3 || curTrialPhase == TrialPhase.end)
+            else if (curTrialPhase == TrialPhase.ongoing_p3 ||
+                     curTrialPhase == TrialPhase.server_output_data || 
+                     curTrialPhase == TrialPhase.end)
             {
                 // server is rensponsible for this phase
                 // client just go on
@@ -129,6 +219,20 @@ public class TrialController : MonoBehaviour
         }
     }
 
+    // timer: https://www.jianshu.com/p/3cc24fb852d7
+    long CurrentTimeMillis()
+    {
+        DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+        TimeSpan diff = DateTime.Now.ToUniversalTime() - origin;
+        return (long)diff.TotalMilliseconds;
+    }
+
+    long AnthoerWayToGetCurrentTimeMillis()
+    {
+        return (long)(DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000;
+    }
+
+    #region public method
     public void receiveServerParams(
         bool connecting, bool sameLab,
         int sTrialIndex, int sTrialPhase,
@@ -144,6 +248,8 @@ public class TrialController : MonoBehaviour
             curTrialPhase = (TrialPhase)sTrialPhase;
             targetScheduler.GetComponent<TargetScheduler>().
                 scheduleTargetsWithServerData(sTrialIndex, sTarget2id);
+            trialData.init(sTrialIndex, sTarget2id);
+            trialData.clientReceivedDataStamp = CurrentTimeMillis();
             serverRefreshData = true;
             Debug.Log("TC - serverRefreshData: " + serverRefreshData);
         }
@@ -157,7 +263,7 @@ public class TrialController : MonoBehaviour
     public void getParams4Server(
         out string cLabName,
         out int cTrialIndex, out int cTrialPhase, out int cTarget2id, 
-        out bool cPhaseFinished, out bool cPhaseSuccess)
+        out bool cPhaseFinished)
     {
 
         cLabName = curLabName;
@@ -165,6 +271,12 @@ public class TrialController : MonoBehaviour
         cTrialPhase = (int)curTrialPhase;
         cTarget2id = targetScheduler.GetComponent<TargetScheduler>().getCurrentTarget2id();
         cPhaseFinished = true;
-        cPhaseSuccess = clientTouchSuccess;
+        //cPhaseSuccess = clientTouchSuccess;
     }
+
+    public string getTrialData4Server()
+    {
+        return trialData.getAllData();
+    }
+    #endregion
 }

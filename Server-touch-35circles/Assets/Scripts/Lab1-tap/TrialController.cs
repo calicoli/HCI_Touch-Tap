@@ -5,24 +5,34 @@ using UnityEngine;
 
 public class TrialController : MonoBehaviour
 {
+    const string curLabName = "Lab1-tap";
+    const int totalTrialTimes = 35 * 35;
+
     public GameObject serverController;
     public GameObject fileProcessor;
+    public GameObject blockAssigner;
     public GameObject targetScheduler;
 
     public GameObject backBtn;
+    public GameObject moveToNextBlockBtn;
 
     [HideInInspector]
     public bool isConnecting;
+    [HideInInspector]
     public bool isPortrait;
 
     public enum TrialPhase
     {
-        inactive = 0,
-        ready = 1,
-        ongoing_p1 = 21,
-        ongoing_p2 = 22,
-        ongoing_p3 = 23,
-        end = 3
+        start = 0,
+        awaiting = 1,
+        scheduling = 2,
+        inactive = 3,
+        ready = 4,
+        ongoing_p1 = 51,
+        ongoing_p2 = 52,
+        ongoing_p3 = 53,
+        server_output_data = 6,
+        end = 9
     }
 
     public struct TrialData
@@ -31,44 +41,115 @@ public class TrialController : MonoBehaviour
         int trialid;
         int firstid, secondid;
         // raw
-        long t1ShowupStamp, t1VanishStamp, t2ShowupStamp, t2VanishStamp;
-        int tp1Count, tpCount;
-        long tp0SuccessStamp, tp1SuccessStamp, tp2SccessStamp;
-        Vector2 tp1CorrectPosition, tp2CorrectPosition;
-        Vector2[] tp1WrongPositions, tp2WrongPositions;
+        public int tp1Count, tp2Count;
+        public long t1ShowupStamp, t2ShowupStamp;
+        public long tp0SuccessStamp, tp1SuccessStamp, tp2SuccessStamp;
+        public Vector2 tp0SuccessPosition, tp1SuccessPosition, tp2SuccessPosition;
+        public ArrayList tp1FailPositions;
+        public string tp2FailPositions;
+        public long serverSendDataStamp, clientReceivedDataStamp;
         // calculate
-        bool isTrialSuccessWithNoError;
-        bool isTarget1SuccessWithNoError, isTarget2SuccessWithNoError;
-        long completeTime;
-        long target1CompleteTime, target2CompleteTime;
-        long target1ShowTime, target2ShowTime;
+        public bool isTrialSuccessWithNoError;
+        public bool isTarget1SuccessWithNoError, isTarget2SuccessWithNoError;
+        public long completeTime, dataTransferTime;
+        public long target1CompleteTime, target2CompleteTime;
+        public long target1ShowTime, target2ShowTime;
 
-        long calTimeSpan(long earlier, long later)
+        public void init(int idx, int id1, int id2)
         {
-            // DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000;
+            trialid = idx;
+            firstid = id1;
+            secondid = id2;
+            tp1Count = 0;
+            tp2Count = 0;
+            tp1FailPositions = new ArrayList(); tp1FailPositions.Clear();
+            tp2FailPositions = null;
+        }
+
+        public long calTimeSpan(long later, long earlier)
+        {
             return later - earlier;
+        }
+
+        public void calMoreData()
+        {
+            // trial success
+            isTarget1SuccessWithNoError = tp1Count == 1 ? true : false;
+            isTarget2SuccessWithNoError = tp2Count == 1 ? true : false;
+            isTrialSuccessWithNoError = isTarget1SuccessWithNoError && isTarget2SuccessWithNoError;
+            // trial time
+            completeTime = calTimeSpan(tp2SuccessStamp, tp0SuccessStamp);
+            dataTransferTime = calTimeSpan(clientReceivedDataStamp, serverSendDataStamp);
+            target1CompleteTime = calTimeSpan(tp1SuccessStamp, tp0SuccessStamp);
+            target2CompleteTime = calTimeSpan(tp2SuccessStamp, tp1SuccessStamp);
+            target1ShowTime = calTimeSpan(tp1SuccessStamp, t1ShowupStamp);
+            target2ShowTime = calTimeSpan(tp2SuccessStamp, t2ShowupStamp);
+        }
+        public string getAllData()
+        {
+            calMoreData();
+            Debug.Log("Part data: " + tp1Count.ToString() + tp2Count.ToString());
+            string str;
+                // assign
+            str = trialid.ToString() + ";" + firstid.ToString() + ";" + secondid.ToString() + ";"
+                // calculate
+                + isTrialSuccessWithNoError.ToString() + ";"
+                + isTarget1SuccessWithNoError.ToString() + ";" + isTarget2SuccessWithNoError.ToString() + ";"
+                + completeTime.ToString() + ";" + dataTransferTime.ToString() + ";"
+                + target1CompleteTime.ToString() + ";" + target2CompleteTime.ToString() + ";"
+                + target1ShowTime.ToString() + ";" + target2ShowTime.ToString() + ";"
+                // raw: success position
+                + tp1SuccessPosition.ToString() + ";" + tp2SuccessPosition + ";"
+                // raw: other data
+                + serverSendDataStamp.ToString() + ";" + clientReceivedDataStamp.ToString() + ";"
+                + tp0SuccessStamp.ToString() + ";" + tp0SuccessPosition.ToString() + ";"
+                + tp1Count.ToString() + ";" 
+                + t1ShowupStamp.ToString() + ";" + tp1SuccessStamp.ToString() + ";" 
+                + tp2Count.ToString() + ";" 
+                + t2ShowupStamp.ToString() + ";" + tp2SuccessStamp.ToString() + ";" 
+                ;
+            if(tp1Count > 1)
+            {
+                for (int i = 0; i < tp1FailPositions.Count; i++)
+                {
+                    str += tp1FailPositions[i].ToString() + "*";
+                }
+            } else
+            {
+                str += "T1NoError";
+            }
+            str += ";";
+            str += (tp2Count > 1) ? tp2FailPositions : "T2NoError";
+            str += ";";
+            return str;
         }
     }
 
-    const string curLabName = "Lab1-tap";
-    const int totalTrialTimes = 25;
+    
     private int curTrialIndex;
     private TrialPhase prevTrialPhase = TrialPhase.end;
     private TrialPhase curTrialPhase;
     private bool clientSaidMoveon;
     private bool haveObjectOnScreen;
+    private string filename;
+
+    private TrialData trialData;
 
     // Start is called before the first frame update
     void Start()
     {
+        isPortrait = true;
         backBtn.SetActive(false);
+        moveToNextBlockBtn.SetActive(false);
 
         isConnecting = false;
         clientSaidMoveon = false;
         haveObjectOnScreen = false;
 
-        curTrialIndex = 1;
-        curTrialPhase = TrialPhase.inactive;
+        filename = "text1.txt";
+
+        curTrialIndex = 0;
+        curTrialPhase = TrialPhase.start;
         
     }
 
@@ -80,15 +161,55 @@ public class TrialController : MonoBehaviour
             Debug.Log("Phase: " + prevTrialPhase + "->" + curTrialPhase);
             prevTrialPhase = curTrialPhase;
         }
-
-        if(curTrialPhase == TrialPhase.inactive)
+        if (curTrialPhase == TrialPhase.start)
         {
-            if(!haveObjectOnScreen)
+            bool haveNextBlock = blockAssigner.GetComponent<BlockAssigner>().haveNextBlock();
+            if(haveNextBlock)
+            {
+                filename = blockAssigner.GetComponent<BlockAssigner>().getFilename();
+                blockAssigner.GetComponent<BlockAssigner>().moveToNextBlock();
+                curTrialPhase = TrialPhase.awaiting;
+            }
+            
+        }
+        else if (curTrialPhase == TrialPhase.awaiting)
+        {
+            bool writeFinished;
+            blockAssigner.GetComponent<BlockAssigner>().writeBlockDataToFile(out writeFinished);
+            if (writeFinished)
+            {
+                curTrialPhase = TrialPhase.scheduling;
+            }
+        }
+        else if (curTrialPhase == TrialPhase.scheduling)
+        {
+            if (curTrialIndex + 1 <= totalTrialTimes)
+            {
+                curTrialIndex++;
+
+                targetScheduler.GetComponent<TargetScheduler>().increaseTrialIndex();
+                targetScheduler.GetComponent<TargetScheduler>().scheduleNewTrial(isPortrait);
+                trialData = new TrialData();
+                trialData.init(curTrialIndex,
+                    targetScheduler.GetComponent<TargetScheduler>().getCurrentTarget1id(),
+                    targetScheduler.GetComponent<TargetScheduler>().getCurrentTarget2id()
+                    );
+                curTrialPhase = TrialPhase.inactive;
+            }
+            else
+            {
+                curTrialPhase = TrialPhase.end;
+            }
+        }
+        else if (curTrialPhase == TrialPhase.inactive)
+        {
+            if (!haveObjectOnScreen)
             {
                 targetScheduler.GetComponent<TargetScheduler>().updateStartBtn(true);
                 haveObjectOnScreen = true;
             }
-            
+
+#if UNITY_IOS || UNITY_ANDROID
             bool moveToNextPhase = false;
             if (Input.touchCount == 1)
             {
@@ -96,104 +217,128 @@ public class TrialController : MonoBehaviour
                 if (touch.phase == TouchPhase.Ended)
                 {
                     moveToNextPhase = process1Touch4StartBtn(touch.position);
-                    if(moveToNextPhase)
+                    if (moveToNextPhase)
                     {
+                        trialData.tp0SuccessStamp = CurrentTimeMillis();
+                        trialData.tp0SuccessPosition = touch.position;
                         targetScheduler.GetComponent<TargetScheduler>().updateStartBtn(false);
                         haveObjectOnScreen = false;
                         curTrialPhase = TrialPhase.ready;
                     }
+                    Debug.Log("Touch the phone at " + touch.position.ToString() + moveToNextPhase.ToString());
                 }
             }
-            else if (Input.GetMouseButtonUp(0))
+#endif
+#if UNITY_ANDROID && UNITY_EDITOR
+            if (Input.GetMouseButtonUp(0))
             {
                 moveToNextPhase = process1Touch4StartBtn(Input.mousePosition);
                 if (moveToNextPhase)
                 {
+                    trialData.tp0SuccessStamp = CurrentTimeMillis();
+                    trialData.tp0SuccessPosition = Input.mousePosition;
                     targetScheduler.GetComponent<TargetScheduler>().updateStartBtn(false);
                     haveObjectOnScreen = false;
                     curTrialPhase = TrialPhase.ready;
                 }
+                //Debug.Log("Click the PC screen at " + Input.mousePosition.ToString() + moveToNextPhase.ToString());
             }
-
+#endif
         }
         else if (curTrialPhase == TrialPhase.ready)
         {
             if (!haveObjectOnScreen)
             {
                 targetScheduler.GetComponent<TargetScheduler>().updateTarget1(true);
+                trialData.t1ShowupStamp = CurrentTimeMillis();
                 haveObjectOnScreen = true;
             }
-                
-            //bool moveToNextPhase; // depend on the task completive condition
+
+#if UNITY_IOS || UNITY_ANDROID
             if (Input.touchCount == 1)
             {
                 Touch touch = Input.GetTouch(0);
                 if (touch.phase == TouchPhase.Ended)
                 {
+                    trialData.tp1Count++;
                     bool touchSuccess = process1Touch4Target1(touch.position);
-                    if(touchSuccess)
+                    if (touchSuccess)
                     {
+                        trialData.tp1SuccessStamp = CurrentTimeMillis();
+                        trialData.tp1SuccessPosition = touch.position;
                         targetScheduler.GetComponent<TargetScheduler>().updateTarget1(false);
                         haveObjectOnScreen = false;
                         curTrialPhase = TrialPhase.ongoing_p1;
                     }
+                    else
+                    {
+                        trialData.tp1FailPositions.Add(touch.position);
+                    }
                 }
             }
-            else if (Input.GetMouseButtonUp(0))
+#endif
+#if UNITY_ANDROID && UNITY_EDITOR
+            if (Input.GetMouseButtonUp(0))
             {
+                trialData.tp1Count++;
                 bool touchSuccess = process1Touch4Target1(Input.mousePosition);
-                if(touchSuccess)
+                if (touchSuccess)
                 {
+                    trialData.tp1SuccessStamp = CurrentTimeMillis();
+                    trialData.tp1SuccessPosition = Input.mousePosition;
                     targetScheduler.GetComponent<TargetScheduler>().updateTarget1(false);
                     haveObjectOnScreen = false;
                     curTrialPhase = TrialPhase.ongoing_p1;
                 }
-                
-            }
+                else
+                {
+                    trialData.tp1FailPositions.Add(Input.mousePosition);
+                }
 
+            }
+#endif
         }
         else if (curTrialPhase == TrialPhase.ongoing_p1)
         {
-            if(isConnecting)
+            if (isConnecting)
             {
+                trialData.serverSendDataStamp = CurrentTimeMillis();
                 serverController.GetComponent<ServerController>().prepareNewMessage4Client(false, true);
-                
-                curTrialPhase = TrialPhase.ongoing_p2;
 
-            } else
-            {
                 curTrialPhase = TrialPhase.ongoing_p2;
             }
+
         }
         else if (curTrialPhase == TrialPhase.ongoing_p2)
         {
             bool moveToNextPhase = clientSaidMoveon;
-            if(isConnecting && moveToNextPhase)
+            if (isConnecting && moveToNextPhase)
             {
                 clientSaidMoveon = false;
-                curTrialPhase = TrialPhase.ongoing_p3;
-            }
-            else if(!isConnecting)
-            {
                 curTrialPhase = TrialPhase.ongoing_p3;
             }
         }
         else if (curTrialPhase == TrialPhase.ongoing_p3)
         {
-            if (curTrialIndex + 1 < totalTrialTimes)
-            {
-                curTrialIndex++;
-                curTrialPhase = TrialPhase.inactive;
-                targetScheduler.GetComponent<TargetScheduler>().increaseTrialIndex();
-            }
-            else
-            {
-                curTrialPhase = TrialPhase.end;
-            }
+            curTrialPhase = TrialPhase.server_output_data;
         }
-        else if(curTrialPhase == TrialPhase.end)
+        else if (curTrialPhase == TrialPhase.server_output_data)
+        {
+            bool writeFinished;
+            string strContent = trialData.getAllData();
+            fileProcessor.GetComponent<FileProcessor>().
+                writeNewDataToFile(filename, strContent, out writeFinished);
+            if (writeFinished)
+            {
+                curTrialPhase = TrialPhase.scheduling;
+            }
+            
+            
+        }
+        else if (curTrialPhase == TrialPhase.end)
         {
             backBtn.SetActive(true);
+            moveToNextBlockBtn.SetActive(true);
         }
         else
         {
@@ -210,7 +355,7 @@ public class TrialController : MonoBehaviour
         {
             Debug.Log("info: " + hit.collider.gameObject.name);
             Debug.DrawLine(ray.origin, hit.point, Color.yellow);
-            if(hit.collider.gameObject.name == "StartBtn-square")
+            if(string.Equals(hit.collider.gameObject.name, "StartBtn-square"))
             {
                 return true;
             }
@@ -250,23 +395,44 @@ public class TrialController : MonoBehaviour
         return (long)diff.TotalMilliseconds;
     }
 
-    long AnthoerWayToGetCurrentTimeMillis(DateTime date)
+    long AnthoerWayToGetCurrentTimeMillis()
     {
         return(long)(DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000;
     }
 
+    void parseTouch2DataString(string cTouchMsg)
+    {
+        Debug.Log("Befor parse: " + cTouchMsg);
+        string[] messages = cTouchMsg.Split('#');
+        int cTrialIndex = System.Convert.ToInt32(messages[0]);
+        int cTarget2id = System.Convert.ToInt32(messages[1]);
+        if (cTrialIndex == curTrialIndex &&
+            cTarget2id == targetScheduler.GetComponent<TargetScheduler>().getCurrentTarget2id()
+            )
+        {
+            trialData.clientReceivedDataStamp = System.Convert.ToInt64(messages[2]);
+            trialData.tp2Count = System.Convert.ToInt32(messages[3]);
+            trialData.t2ShowupStamp = System.Convert.ToInt64(messages[4]);
+            trialData.tp2SuccessStamp = System.Convert.ToInt64(messages[5]);
+            trialData.tp2SuccessPosition = 
+                new Vector2(System.Convert.ToSingle(messages[6]), System.Convert.ToSingle(messages[7]));
+            trialData.tp2FailPositions = messages[8];
+        }
+    }
+
+#region Public methods
     // check if server need to send message to client again
     public bool checkClientTargetTouch( string clientLabName,
         int cTrialIndex, int cTrialPhase, int cTarget2id, 
-        bool cPhaseFinished,bool cPhaseSuccess)
+        bool cPhaseFinished, string cTouch2data)
     {
         int curTarget2id = targetScheduler.GetComponent<TargetScheduler>().getCurrentTarget2id();
         if(string.Equals(clientLabName, curLabName) 
             && cTrialIndex == curTrialIndex && (cTrialPhase == (int)curTrialPhase) 
             && cTarget2id == curTarget2id)
         {
+            parseTouch2DataString(cTouch2data);
             clientSaidMoveon = cPhaseFinished;
-            // deal with cPhaseSuccess
             return false;
         }
         return true;
@@ -283,4 +449,9 @@ public class TrialController : MonoBehaviour
         sTarget2id = targetScheduler.GetComponent<TargetScheduler>().getCurrentTarget2id();
     }
 
+    public void setFilename(string str)
+    {
+        filename = str;
+    }
+#endregion
 }

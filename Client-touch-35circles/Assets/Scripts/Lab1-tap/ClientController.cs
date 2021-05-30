@@ -42,7 +42,7 @@ public class ClientController : MonoBehaviour
         bool isConnecting = (socketConnection != null);
         connectBtn.SetActive(!isConnecting);
         renderCamera.backgroundColor = (!isConnecting ? disconnectColor : connectColor);
-        ipText.gameObject.SetActive(isConnecting);
+        //ipText.gameObject.SetActive(isConnecting);
         angleProcessor.GetComponent<AngleProcessor>().isConnecting = isConnecting;
 
         if (refreshed)
@@ -101,7 +101,6 @@ public class ClientController : MonoBehaviour
 
     private void sendMessage(bool refreshAngle, bool refreshTrial)
     {
-        
         if (socketConnection == null) {
             return;
         }
@@ -111,27 +110,29 @@ public class ClientController : MonoBehaviour
         Vector3 acc = Input.acceleration;
         string cLabName;
         int cTrialIndex, cTrialPhase, cTarget2id;
-        bool cPhaseFinished, cPhaseSuccess;
+        bool cPhaseFinished; //cPhaseSuccess;
         trialController.GetComponent<TrialController>().
-            getParams4Server(out cLabName, out cTrialIndex, out cTrialPhase, out cTarget2id, out cPhaseFinished, out cPhaseSuccess);
+            getParams4Server(out cLabName, out cTrialIndex, out cTrialPhase, out cTarget2id, out cPhaseFinished);
         string flagPhase;
         flagPhase = cPhaseFinished ? "T" : "F";
-        flagPhase = cPhaseSuccess ? flagPhase + "T" : flagPhase + "F";
+        //flagPhase = cPhaseSuccess ? flagPhase + "T" : flagPhase + "F";
+        string cTouch2data = trialController.GetComponent<TrialController>().getTrialData4Server();
         try
         {
             NetworkStream stream = socketConnection.GetStream();
             if (stream.CanWrite)
             {
                 string clientMessage =
-                    flag + "," +
-                    acc.x + "," +
-                    acc.y + "," +
-                    acc.z + "," +
-                    cLabName + "," +
-                    cTrialIndex + "," +
-                    cTrialPhase + "," +
-                    cTarget2id + "," +
-                    flagPhase + ","
+                    flag + ";" +
+                    acc.x + ";" +
+                    acc.y + ";" +
+                    acc.z + ";" +
+                    cLabName + ";" +
+                    cTrialIndex + ";" +
+                    cTrialPhase + ";" +
+                    cTarget2id + ";" +
+                    flagPhase + ";" + 
+                    cTouch2data + ";"
                     ;
                 byte[] clientMessageAsByteArray = Encoding.ASCII.GetBytes(clientMessage);
                 stream.Write(clientMessageAsByteArray, 0, clientMessageAsByteArray.Length);
@@ -189,14 +190,25 @@ public class ClientController : MonoBehaviour
 
     public void connect()
     {
+        /*
 #if UNITY_ANDROID && UNITY_EDITOR
         //string address_editor = "192.168.236.1";
-        string address_editor = "10.21.39.119";
+        //string address_editor = "10.21.39.144";
+        string address_editor = "192.168.0.108";
         ConnectToTcpServer(address_editor);
+        ipText.text = address_editor;
 #endif
+
 #if UNITY_IOS || UNITY_ANDROID
         string address_mobile = "192.168.0.108";
+        //string address_mobile = "100.46.121.97";
         ConnectToTcpServer(address_mobile);
+        ipText.text = address_mobile;
 #endif
+        */
+        string address = "192.168.0.108";
+        ipText.text = address;
+        ConnectToTcpServer(address);
+        
     }
 }

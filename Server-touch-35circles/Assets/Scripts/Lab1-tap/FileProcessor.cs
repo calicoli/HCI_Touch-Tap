@@ -2,31 +2,45 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FileProcessor : MonoBehaviour
 {
+    //private string strWriteData;
+
     // Start is called before the first frame update
     void Start()
     {
-        string filename = "testt.txt";
+        
+        string filename = "filtProcessor.txt";
         string originText = readStringFromFile(filename);
-        string writeText = originText +"\r\n" + "test text";
+        string writeText = originText + "\r\n" + originText + "\r\n";
         writeStringToFile(writeText, filename);
         string readText = readStringFromFile(filename);
         Debug.Log(readText);
+        /*
+        strWriteData = null;
+        */
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     public void writeStringToFile(string str, string filename)
     {
 #if !WEB_BUILD
         string path = pathForDocumentsFile(filename);
-        FileStream file = new FileStream(path, FileMode.Create, FileAccess.Write);
+        FileStream file;
+        if (File.Exists(path))
+        {
+            file = new FileStream(path, FileMode.Append, FileAccess.Write);
+        } else
+        {
+            file = new FileStream(path, FileMode.Create, FileAccess.Write);
+        }
 
         StreamWriter sw = new StreamWriter(file);
         sw.WriteLine(str);
@@ -88,5 +102,22 @@ return null;
             path = path.Substring(0, path.LastIndexOf('/'));
             return Path.Combine(path, filename);
         }
+    }
+
+    public void setWriteData(string str)
+    {
+        //strWriteData = str;
+    }
+
+    public void writeNewDataToFile(string filename, string strContent, out bool writeFinished)
+    {
+        //string originText = readStringFromFile(filename);
+        //string writeText = originText + "\r\n" + strContent + "\r\n";
+        string writeText = strContent;
+        writeStringToFile(writeText, filename);
+        string readText = readStringFromFile(filename);
+        Debug.Log(readText);
+
+        writeFinished = true;
     }
 }

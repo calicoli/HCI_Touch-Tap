@@ -9,7 +9,7 @@ public class TargetScheduler : MonoBehaviour
     public GameObject targets2;
     //public GameObject startBtn;
 
-    const int repeatTime = 1;
+    const int repeatTime = 35;
     const int columnCnt= 5, rowCnt = 7;
     const int target2Cnt = 35;
 
