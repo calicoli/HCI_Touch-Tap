@@ -27,3 +27,4 @@
 0;0;0;0;0;old_rightForefinger;protrait;concave;60;1;
 0;0;0;0;0;old_rightForefinger;protrait;concave;60;1;
 0;0;0;0;0;old_rightForefinger;protrait;concave;60;1;
+0;0;0;0;0;old_rightForefinger;protrait;concave;60;1;

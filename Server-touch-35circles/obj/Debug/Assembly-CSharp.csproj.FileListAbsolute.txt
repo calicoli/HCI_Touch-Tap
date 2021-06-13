@@ -270,3 +270,7 @@ F:\GitHub\HCI_Touch\Server-touch\Temp\bin\Debug\UnityEngine.TestRunner.pdb
 F:\GitHub\HCI_Touch\Server-touch\obj\Debug\Assembly-CSharp.csproj.CopyComplete
 F:\GitHub\HCI_Touch\Server-touch\obj\Debug\Assembly-CSharp.dll
 F:\GitHub\HCI_Touch\Server-touch\obj\Debug\Assembly-CSharp.pdb
+F:\GitHub\HCI_Touch\Server-touch-35circles\obj\Debug\Assembly-CSharp.csprojAssemblyReference.cache
+F:\GitHub\HCI_Touch\Server-touch-35circles\obj\Debug\Assembly-CSharp.csproj.CoreCompileInputs.cache
+F:\GitHub\HCI_Touch\Server-touch-35circles\obj\Debug\Assembly-CSharp.dll
+F:\GitHub\HCI_Touch\Server-touch-35circles\obj\Debug\Assembly-CSharp.pdb
