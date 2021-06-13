@@ -3,6 +3,7 @@
 
 ## How to use
 
+0. Make sure that both devices are under the same wifi
 1. Connect both device:
 - Client device: Input Server IP (showed on the bottom of server screen)
 - Client decive: click "Connect" button
