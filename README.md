@@ -21,7 +21,7 @@
 - Server device: input User ID
 - Server device: choose target lab
 - Server device: choose lab mode
-- Server device: click "Confrim" button
+- Server device: click "Confirm" button
 3. Adjust both devices to fullfil requirements
 - addjust conditions to fullfil requirements showed on the server screen
 - you will see a "Confirm" button if the angle is appropriate
