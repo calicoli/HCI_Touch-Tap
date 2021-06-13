@@ -1,12 +1,14 @@
 # HCI_Touch
 
 ## Selective options
-1. lab options
+1. Lab options
 - Lab1-3×3 (available)
 - Lab2-5×7 (not available now)
-2. lab modes
-- Full mode: contain 81 trials per block (available)
-- Test mode: contain 5 trials per block (available)
+2. Lab modes
+- Full mode (available)
+  - Lab1-3×3: contain 81 trials per block
+- Test mode (available)
+  - Lab1-3×3: contain 5 trials per block
 
 ## How to use
 
