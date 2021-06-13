@@ -8,30 +8,28 @@ using System.Text;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
+using static PublicLabFactors;
 
 public class ServerController : MonoBehaviour
 {
-    public Text ipText;
-    public Camera renderCamera;
-
-    public GameObject angleProcessor;
-    public GameObject trialController;
-
-    private Color disconnectColor = new Color(0.8156f, 0.3529f, 0.4313f);
-    private Color connectColor = new Color(0f, 0f, 0f);
-
-    private Vector3 pos = new Vector3(0, 0, 0);
 
     private TcpListener tcpListener;
     private Thread tcpListenerThread;
     private TcpClient connectedTcpClient;
-    private string receiveMsg = "";
-    private bool clientRefreshed = false;
 
-    private bool noConnection = true;
+    private Queue receivedQueue;
+
+    private static char paramSeperators = ';';
+    private static string[] stringSeparators = new string[] { "//##MSGEND##//" };
 
     void Start()
     {
+        receivedQueue = new Queue();
+        if (receivedQueue.Count != 0)
+        {
+            receivedQueue.Clear();
+        }
+
         tcpListenerThread = new Thread(new ThreadStart(ListenForIncommingRequests));
         tcpListenerThread.IsBackground = true;
         tcpListenerThread.Start();
@@ -39,22 +37,14 @@ public class ServerController : MonoBehaviour
 
     void Update()
     {
-        ipText.text = getIPAddress();
+        GlobalController.Instance.serverip = getIPAddress();
         bool isConnecting = connectedTcpClient != null;
-        renderCamera.backgroundColor = (isConnecting ? connectColor : disconnectColor);
-        angleProcessor.GetComponent<AngleProcessor>().isConnecting = isConnecting;
-        trialController.GetComponent<TrialController>().isConnecting = isConnecting;
+        
+        GlobalController.Instance.setConnectingStatus(isConnecting);
 
-        if (isConnecting && noConnection)
+        while(receivedQueue.Count !=0)
         {
-            // the first time to sendMessage();
-            sendMessage(true, true);
-            noConnection = false;
-        }
-        if (clientRefreshed)
-        {
-            getVector();
-            clientRefreshed = false;
+            processReceivedMessage();
         }
     }
 
@@ -77,8 +67,12 @@ public class ServerController : MonoBehaviour
                         {
                             var incommingData = new byte[length];
                             Array.Copy(bytes, 0, incommingData, 0, length);
-                            receiveMsg = Encoding.ASCII.GetString(incommingData);
-                            clientRefreshed = true;
+                            string streamMsg = Encoding.ASCII.GetString(incommingData);
+                            string[] rawMsg = streamMsg.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
+                            for(int i=0; i< rawMsg.Length; i++)
+                            {
+                                receivedQueue.Enqueue(rawMsg[i]);
+                            }
                         }
                     }
                 }
@@ -90,37 +84,21 @@ public class ServerController : MonoBehaviour
         }
     }
 
-    private void sendMessage(bool sendAngleData, bool sendTrialData)
+    private void sendMessage(string serverMessage)
     {
         if (connectedTcpClient == null)
         {
             return;
         }
-        string flag;
-        flag = sendAngleData ? "T" : "F";
-        flag = sendTrialData ? flag + "T" : flag + "F";
-        float angle = angleProcessor.GetComponent<AngleProcessor>().getAngle();
-        string sLabName;
-        int sTrialIndex, sTrialPhase, sTarget2id;
-        trialController.GetComponent<TrialController>().
-            getParams4Client(out sLabName, out sTrialIndex, out sTrialPhase, out sTarget2id);
-
         try
         {
             NetworkStream stream = connectedTcpClient.GetStream();
             if (stream.CanWrite)
             {
-                string serverMessage =
-                    flag + "," +
-                    angle + "," +
-                    sLabName + "," +
-                    sTrialIndex + "," +
-                    sTrialPhase + "," +
-                    sTarget2id + ","
-                    ;
+                serverMessage += stringSeparators[0];
                 byte[] serverMessageAsByteArray = Encoding.ASCII.GetBytes(serverMessage);
                 stream.Write(serverMessageAsByteArray, 0, serverMessageAsByteArray.Length);
-                Debug.Log("Server sent his message - should be received by client");
+                //Debug.Log("Server sent his message - should be received by client");
                 Debug.Log("S sendMsg: " + serverMessage);
             }
         }
@@ -143,43 +121,106 @@ public class ServerController : MonoBehaviour
         throw new System.Exception("No network adapters with an IPv4 address in the system!");
     }
 
-    private void getVector()
+    private void processReceivedMessage()
     {
+        string receiveMsg = (string)receivedQueue.Dequeue();
         Debug.Log("S rcvMsg: " + receiveMsg);
-        string[] messages = receiveMsg.Split(';');
-
-        char refreshAngle = messages[0][0];
-        char refreshTrial = messages[0][1];
-
-        if (refreshAngle - 'T' == 0)
+        string[] messages = receiveMsg.Split(paramSeperators);
+        MessageType msgType = (MessageType)Enum.Parse(typeof(MessageType), messages[0]);
+        if (msgType == MessageType.Angle)
         {
-            Vector3 accClient = new Vector3(
-                System.Convert.ToSingle(messages[1]),
-                System.Convert.ToSingle(messages[2]),
-                System.Convert.ToSingle(messages[3]));
+            analyzeAngleInfo(messages);
         }
-        if (refreshTrial - 'T' == 0)
+        else if(msgType == MessageType.Scene)
         {
-            string cLabName = messages[4];
-            int cTrialIndex = System.Convert.ToInt32(messages[5]);
-            int cTrialPhase = System.Convert.ToInt32(messages[6]);
-            int cTarget2id = System.Convert.ToInt32(messages[7]);
-            bool cPhaseFinished = (messages[8][0] - 'T' == 0);
-            //bool cPhaseSuccess = (messages[8][1] - 'T' == 0);
-            string cTouch2data = messages[9];
-            bool sendMessageToClientAgain = false;
-            sendMessageToClientAgain = trialController.GetComponent<TrialController>().
-                checkClientTargetTouch(cLabName, cTrialIndex, cTrialPhase, cTarget2id, 
-                cPhaseFinished, cTouch2data);
-            if (sendMessageToClientAgain)
-            {
-                prepareNewMessage4Client(false, true);
-            }
-
+            analyzeSceneInfo(messages);
+        }
+        else if (msgType == MessageType.Trial)
+        {
+            analyzeTrialInfo(messages);
         }
     }
-    public void prepareNewMessage4Client(bool refreshAngle, bool refreshTrial)
+
+    private void analyzeSceneInfo(string[] messages)
     {
-        sendMessage(refreshAngle, refreshTrial);
+        GlobalController.Instance.curClientScene = (LabScene)Enum.Parse(typeof(LabScene), messages[1]);
+    }
+
+    private void analyzeAngleInfo(string[] messages)
+    {
+        Vector3 accReceived = new Vector3(
+            Convert.ToSingle(messages[1]),
+            Convert.ToSingle(messages[2]),
+            Convert.ToSingle(messages[3])
+        );
+        GlobalController.Instance.accClient = accReceived;
+    }
+
+    private void analyzeTrialInfo(string[] messages)
+    {
+        Vector3 cAcc = new Vector3(
+            Convert.ToSingle(messages[1]),
+            Convert.ToSingle(messages[2]),
+            Convert.ToSingle(messages[3]));
+
+        int cTrialIndex = Convert.ToInt32(messages[4]);
+        int cRepeatIndex = Convert.ToInt32(messages[5]);
+        int cTarget2id = Convert.ToInt32(messages[6]);
+        string cTrialPhase = messages[7];
+        string cTouch2data = messages[8];
+        bool sendMessageToClientAgain = false;
+        
+        sendMessageToClientAgain = GlobalController.Instance.
+            checkClientTarget2Touch(cTrialIndex, cRepeatIndex, cTarget2id, 
+            cTrialPhase, cTouch2data);
+        if (sendMessageToClientAgain)
+        {
+            prepareNewMessage4Client(MessageType.Trial);
+        } else
+        {
+            GlobalController.Instance.accClient = cAcc;
+        }
+    }
+
+    public void prepareNewMessage4Client(MessageType msgType, ServerCommand cmd)
+    {
+        if (msgType == MessageType.Command)
+        {
+            string msgContent = msgType.ToString() + paramSeperators + cmd.ToString() + paramSeperators;
+            sendMessage(msgContent);
+        }
+        
+    }
+    public void prepareNewMessage4Client(MessageType msgType)
+    {
+        string msgContent = "";
+        if (msgType == MessageType.Block)
+        {
+            //int blockid = GlobalController.Instance.curBlockid;
+            string targetLab = GlobalController.Instance.getLabSceneToEnter();
+            msgContent = msgType.ToString() + paramSeperators
+                       + targetLab + paramSeperators;
+            
+        }
+        else if(msgType == MessageType.Scene)
+        {
+            string serverScene = GlobalController.Instance.curServerScene.ToString();
+            msgContent = msgType.ToString() + paramSeperators
+                        + serverScene + paramSeperators;
+        }
+        else if (msgType == MessageType.Trial)
+        {
+            //float angle = GlobalController.Instance.curAngle;
+            int sTrialid = GlobalController.Instance.curLab1Trialid;
+            int sRepetitionid = GlobalController.Instance.curLab1Repeateid;
+            int sTarget2id = GlobalController.Instance.curLab1Trial.secondid;
+            string sTrialPhase = GlobalController.Instance.curLab1TrialPhase.ToString();
+            msgContent = msgType.ToString() + paramSeperators
+                        + sRepetitionid + paramSeperators
+                        + sTrialid + paramSeperators
+                        + sTarget2id + paramSeperators
+                        + sTrialPhase + paramSeperators;
+        }
+        sendMessage(msgContent);
     }
 }

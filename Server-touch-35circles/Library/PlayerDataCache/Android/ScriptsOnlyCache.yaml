@@ -2,14 +2,15 @@ ScriptsOnlyBuild:
   usedScripts:
     Assembly-CSharp.dll:
     - AngleProcessor
-    - BlockAssigner
-    - EntryButtonController
     - FileProcessor
-    - LabFactors
+    - GlobalController
     - ServerController
-    - TargetScheduler
-    - TrialController
-    - lab1ButtonController
+    - enPhaseController
+    - enUIController
+    - lab1PhaseController
+    - lab1Target1Controller
+    - lab1TrialController
+    - lab1UIController
     Unity.Rider.Editor.dll:
     - Packages.Rider.Editor.UnitTesting.CallbackData
     UnityEditor.TestRunner.dll:
@@ -21,12 +22,17 @@ ScriptsOnlyBuild:
     - UnityEngine.EventSystems.StandaloneInputModule
     - UnityEngine.UI.Button
     - UnityEngine.UI.CanvasScaler
+    - UnityEngine.UI.Dropdown
     - UnityEngine.UI.GraphicRaycaster
     - UnityEngine.UI.Image
     - UnityEngine.UI.InputField
+    - UnityEngine.UI.Mask
+    - UnityEngine.UI.ScrollRect
+    - UnityEngine.UI.Scrollbar
     - UnityEngine.UI.Text
+    - UnityEngine.UI.Toggle
   sceneClasses:
-    Assets/Scenes/Entry.unity:
+    Assets/Scenes/Entry_scene.unity:
     - Class: 1
       Script: {instanceID: 0}
     - Class: 4
@@ -50,19 +56,39 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 11410}
     - Class: 114
+      Script: {instanceID: 11412}
+    - Class: 114
       Script: {instanceID: 11452}
     - Class: 114
-      Script: {instanceID: 11850}
+      Script: {instanceID: 11474}
     - Class: 114
-      Script: {instanceID: 11888}
+      Script: {instanceID: 11760}
     - Class: 114
-      Script: {instanceID: 12240}
+      Script: {instanceID: 11854}
     - Class: 114
-      Script: {instanceID: 12432}
+      Script: {instanceID: 12050}
     - Class: 114
-      Script: {instanceID: 12728}
+      Script: {instanceID: 12092}
+    - Class: 114
+      Script: {instanceID: 12248}
+    - Class: 114
+      Script: {instanceID: 12322}
+    - Class: 114
+      Script: {instanceID: 12426}
+    - Class: 114
+      Script: {instanceID: 12442}
+    - Class: 114
+      Script: {instanceID: 12666}
+    - Class: 114
+      Script: {instanceID: 12740}
+    - Class: 114
+      Script: {instanceID: 12998}
     - Class: 114
       Script: {instanceID: 13082}
+    - Class: 114
+      Script: {instanceID: 13094}
+    - Class: 114
+      Script: {instanceID: 13108}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -79,7 +105,7 @@ ScriptsOnlyBuild:
       Script: {instanceID: 0}
     - Class: 224
       Script: {instanceID: 0}
-    Assets/Scenes/Lab1-tap.unity:
+    Assets/Scenes/Lab1_tap_33_33.unity:
     - Class: 1
       Script: {instanceID: 0}
     - Class: 4
@@ -111,31 +137,23 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 11410}
     - Class: 114
-      Script: {instanceID: 11442}
-    - Class: 114
       Script: {instanceID: 11452}
     - Class: 114
-      Script: {instanceID: 11474}
+      Script: {instanceID: 11786}
     - Class: 114
-      Script: {instanceID: 11662}
+      Script: {instanceID: 11854}
     - Class: 114
-      Script: {instanceID: 11692}
+      Script: {instanceID: 11908}
     - Class: 114
-      Script: {instanceID: 11850}
+      Script: {instanceID: 12116}
     - Class: 114
-      Script: {instanceID: 12064}
+      Script: {instanceID: 12248}
     - Class: 114
-      Script: {instanceID: 12240}
+      Script: {instanceID: 12740}
     - Class: 114
-      Script: {instanceID: 12416}
+      Script: {instanceID: 13094}
     - Class: 114
-      Script: {instanceID: 12604}
-    - Class: 114
-      Script: {instanceID: 12728}
-    - Class: 114
-      Script: {instanceID: 12986}
-    - Class: 114
-      Script: {instanceID: 13082}
+      Script: {instanceID: 13146}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 120
@@ -232,7 +250,7 @@ ScriptsOnlyBuild:
       Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
-    className: LabFactors
+    className: PublicLabFactors
   - hash:
       serializedVersion: 2
       Hash: 89f9a1b4c64db9559e39f4a2e3bfaadd
@@ -247,7 +265,7 @@ ScriptsOnlyBuild:
     className: TestResultRendererCallback
   - hash:
       serializedVersion: 2
-      Hash: e25f243e5acecad92544c6ce1c598076
+      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: AngleProcessor
@@ -263,6 +281,12 @@ ScriptsOnlyBuild:
     assemblyName: UnityEngine.UI.dll
     namespaceName: UnityEngine.UI
     className: GridLayoutGroup
+  - hash:
+      serializedVersion: 2
+      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: lab1Factors
   - hash:
       serializedVersion: 2
       Hash: 8aa3d6ccbcb54ee8db6c1229854adaaa
@@ -316,7 +340,7 @@ ScriptsOnlyBuild:
       Hash: 08fdf4f54a104bb0068292f69fa5b295
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
-    className: TargetScheduler
+    className: lab2TargetScheduler
   - hash:
       serializedVersion: 2
       Hash: 1103fb0758976355cdf9b7d5ce9cb7e0
@@ -349,6 +373,12 @@ ScriptsOnlyBuild:
     className: Shadow
   - hash:
       serializedVersion: 2
+      Hash: 330d2a86b3937b5018a4832cc0b35007
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: lab1UIController
+  - hash:
+      serializedVersion: 2
       Hash: dda952b8a775649d946b388195c3abab
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
@@ -379,12 +409,6 @@ ScriptsOnlyBuild:
     className: TMP_SpriteAsset
   - hash:
       serializedVersion: 2
-      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
-    assemblyName: Assembly-CSharp.dll
-    namespaceName: 
-    className: EntryButtonController
-  - hash:
-      serializedVersion: 2
       Hash: c3d3430df9e3ea95e3e3d587961390fb
     assemblyName: Unity.Timeline.dll
     namespaceName: UnityEngine.Timeline
@@ -395,6 +419,12 @@ ScriptsOnlyBuild:
     assemblyName: UnityEngine.UI.dll
     namespaceName: UnityEngine.UI
     className: Selectable
+  - hash:
+      serializedVersion: 2
+      Hash: 95b7a792dbbf22a4f7a3826bb50632f3
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: lab1Target1Controller
   - hash:
       serializedVersion: 2
       Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
@@ -409,16 +439,22 @@ ScriptsOnlyBuild:
     className: ScrollRect
   - hash:
       serializedVersion: 2
-      Hash: 587b3e878a7684b5965b03745d852086
-    assemblyName: Assembly-CSharp.dll
-    namespaceName: 
-    className: TrialController
-  - hash:
-      serializedVersion: 2
       Hash: c3d3430df9e3ea95e3e3d587961390fb
     assemblyName: Unity.Timeline.dll
     namespaceName: UnityEngine.Timeline
     className: SignalTrack
+  - hash:
+      serializedVersion: 2
+      Hash: 84b668cec990696537521dc369d9ea17
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: GlobalController
+  - hash:
+      serializedVersion: 2
+      Hash: 314f75227bfebb49e24d0b331c9cf71a
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: lab1TrialController
   - hash:
       serializedVersion: 2
       Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
@@ -451,6 +487,12 @@ ScriptsOnlyBuild:
     className: RawImage
   - hash:
       serializedVersion: 2
+      Hash: 0461d9172a2f14dcb17876ff650c020d
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: enPhaseController
+  - hash:
+      serializedVersion: 2
       Hash: 5ad4aa237d47ac2bab17bacb672edf7a
     assemblyName: UnityEngine.UI.dll
     namespaceName: UnityEngine.UI
@@ -463,7 +505,7 @@ ScriptsOnlyBuild:
     className: stButtonController
   - hash:
       serializedVersion: 2
-      Hash: 4f908462238d157cbf8fea11b582d283
+      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: ServerController
@@ -526,7 +568,13 @@ ScriptsOnlyBuild:
       Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
-    className: lab1ButtonController
+    className: lab2ButtonController
+  - hash:
+      serializedVersion: 2
+      Hash: ffadbd63a6a6b4ffa5bb10ed592aae2d
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: enUIController
   - hash:
       serializedVersion: 2
       Hash: 6939772cb3ce775a8e8d99f332534491
@@ -655,6 +703,12 @@ ScriptsOnlyBuild:
     className: SignalEmitter
   - hash:
       serializedVersion: 2
+      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: lab1TargetScheduler
+  - hash:
+      serializedVersion: 2
       Hash: 7072231382eb3c4871b3dd75ad0227e1
     assemblyName: UnityEngine.UI.dll
     namespaceName: UnityEngine.UI
@@ -667,12 +721,18 @@ ScriptsOnlyBuild:
     className: ToggleGroup
   - hash:
       serializedVersion: 2
+      Hash: 2fc685ee960101488d782745c23d22a5
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: lab1PhaseController
+  - hash:
+      serializedVersion: 2
       Hash: c3d3430df9e3ea95e3e3d587961390fb
     assemblyName: Unity.Timeline.dll
     namespaceName: UnityEngine.Timeline
     className: PlayableTrack
   platform: 13
   scenePathNames:
-  - Assets/Scenes/Entry.unity
-  - Assets/Scenes/Lab1-tap.unity
+  - Assets/Scenes/Entry_scene.unity
+  - Assets/Scenes/Lab1_tap_33_33.unity
   playerPath: D:/WorkSpace/Unity Build/touch-server.apk

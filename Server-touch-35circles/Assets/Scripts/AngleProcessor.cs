@@ -1,59 +1,53 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
+using static PublicLabFactors;
 
 public class AngleProcessor : MonoBehaviour
 {
-    public Text angleText;
-
-    [HideInInspector]
-    public bool isConnecting;
-
     const float defaultAngle = Mathf.PI;
     private float angle;
 
     private Vector3 accThis;
     private Vector3 accOther;
 
+    private bool inReceivingAccStatus;
+
     // Start is called before the first frame update
     void Start()
     {
         angle = defaultAngle;
-        Debug.Log(GlobalController.Instance.userid);
+        //Debug.Log(GlobalController.Instance.userid);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (isConnecting)
+        if (inReceivingAccStatus)
         {
             accThis = Input.acceleration;
             accThis.y = 0f;
-            //accOther = getComponent<>;
+            accOther = GlobalController.Instance.accClient;
             accOther.y = 0f;
 
             angle = Vector3.Angle(accThis, accOther);
+
+            if(GlobalController.Instance.curBlockCondition.getShape() == Shape.concave)
+            {
+                GlobalController.Instance.curAngle = 180 - angle;
+            } else
+            {
+                GlobalController.Instance.curAngle = 180 + angle;
+            }
         }
         else
         {
             angle = defaultAngle;
         }
-        if (Input.deviceOrientation == DeviceOrientation.LandscapeLeft ||
-            Input.deviceOrientation == DeviceOrientation.LandscapeRight)
-        {
-            angleText.text = "L-";
-        } else
-        {
-            angleText.text = "P-";
-        }
-        angleText.text += ("A: " + (180 * angle / Mathf.PI).ToString());
     }
 
-    public float getAngle()
+
+
+    public void setReceivingAccStatus(bool open)
     {
-        return angle;
+        inReceivingAccStatus = open;
     }
-
 }

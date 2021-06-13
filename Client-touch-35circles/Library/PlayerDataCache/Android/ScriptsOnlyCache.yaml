@@ -3,10 +3,13 @@ ScriptsOnlyBuild:
     Assembly-CSharp.dll:
     - AngleProcessor
     - ClientController
-    - FileProcessor
-    - TargetScheduler
-    - TrialController
-    - lab1ButtonController
+    - GlobalController
+    - enPhaseController
+    - enUIController
+    - lab1PhaseController
+    - lab1Target2Controller
+    - lab1TrialController
+    - lab1UIController
     Unity.Rider.Editor.dll:
     - Packages.Rider.Editor.UnitTesting.CallbackData
     UnityEditor.TestRunner.dll:
@@ -20,9 +23,71 @@ ScriptsOnlyBuild:
     - UnityEngine.UI.CanvasScaler
     - UnityEngine.UI.GraphicRaycaster
     - UnityEngine.UI.Image
+    - UnityEngine.UI.InputField
     - UnityEngine.UI.Text
   sceneClasses:
-    Assets/Scenes/Lab1-tap.unity:
+    Assets/Scenes/Entry_scene.unity:
+    - Class: 1
+      Script: {instanceID: 0}
+    - Class: 4
+      Script: {instanceID: 0}
+    - Class: 20
+      Script: {instanceID: 0}
+    - Class: 21
+      Script: {instanceID: 0}
+    - Class: 28
+      Script: {instanceID: 0}
+    - Class: 48
+      Script: {instanceID: 0}
+    - Class: 81
+      Script: {instanceID: 0}
+    - Class: 104
+      Script: {instanceID: 0}
+    - Class: 108
+      Script: {instanceID: 0}
+    - Class: 114
+      Script: {instanceID: 11252}
+    - Class: 114
+      Script: {instanceID: 11410}
+    - Class: 114
+      Script: {instanceID: 11450}
+    - Class: 114
+      Script: {instanceID: 11472}
+    - Class: 114
+      Script: {instanceID: 11848}
+    - Class: 114
+      Script: {instanceID: 11886}
+    - Class: 114
+      Script: {instanceID: 12236}
+    - Class: 114
+      Script: {instanceID: 12414}
+    - Class: 114
+      Script: {instanceID: 12430}
+    - Class: 114
+      Script: {instanceID: 12728}
+    - Class: 114
+      Script: {instanceID: 13000}
+    - Class: 114
+      Script: {instanceID: 13034}
+    - Class: 114
+      Script: {instanceID: 13088}
+    - Class: 115
+      Script: {instanceID: 0}
+    - Class: 128
+      Script: {instanceID: 0}
+    - Class: 157
+      Script: {instanceID: 0}
+    - Class: 196
+      Script: {instanceID: 0}
+    - Class: 213
+      Script: {instanceID: 0}
+    - Class: 222
+      Script: {instanceID: 0}
+    - Class: 223
+      Script: {instanceID: 0}
+    - Class: 224
+      Script: {instanceID: 0}
+    Assets/Scenes/Lab1_tap_33_33.unity:
     - Class: 1
       Script: {instanceID: 0}
     - Class: 4
@@ -54,27 +119,19 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 11410}
     - Class: 114
-      Script: {instanceID: 11450}
+      Script: {instanceID: 11580}
     - Class: 114
-      Script: {instanceID: 11472}
+      Script: {instanceID: 11848}
     - Class: 114
-      Script: {instanceID: 11660}
+      Script: {instanceID: 12602}
     - Class: 114
-      Script: {instanceID: 11846}
+      Script: {instanceID: 12644}
     - Class: 114
-      Script: {instanceID: 12060}
+      Script: {instanceID: 12728}
     - Class: 114
-      Script: {instanceID: 12236}
+      Script: {instanceID: 12870}
     - Class: 114
-      Script: {instanceID: 12412}
-    - Class: 114
-      Script: {instanceID: 12600}
-    - Class: 114
-      Script: {instanceID: 12724}
-    - Class: 114
-      Script: {instanceID: 12982}
-    - Class: 114
-      Script: {instanceID: 13078}
+      Script: {instanceID: 13088}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 120
@@ -84,8 +141,6 @@ ScriptsOnlyBuild:
     - Class: 157
       Script: {instanceID: 0}
     - Class: 196
-      Script: {instanceID: 0}
-    - Class: 213
       Script: {instanceID: 0}
     - Class: 222
       Script: {instanceID: 0}
@@ -180,7 +235,7 @@ ScriptsOnlyBuild:
     className: TestResultRendererCallback
   - hash:
       serializedVersion: 2
-      Hash: e25f243e5acecad92544c6ce1c598076
+      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: AngleProcessor
@@ -190,6 +245,12 @@ ScriptsOnlyBuild:
     assemblyName: Unity.TextMeshPro.dll
     namespaceName: TMPro
     className: TMP_InputField
+  - hash:
+      serializedVersion: 2
+      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: lab1Factors
   - hash:
       serializedVersion: 2
       Hash: 7ab0e790220bdca831fdd886b339039d
@@ -222,6 +283,12 @@ ScriptsOnlyBuild:
     className: PhysicsRaycaster
   - hash:
       serializedVersion: 2
+      Hash: 2fc685ee960101488d782745c23d22a5
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: lab1PhaseController
+  - hash:
+      serializedVersion: 2
       Hash: bd3cf68c8964d3c66d1c43f4f98508c9
     assemblyName: Unity.Timeline.dll
     namespaceName: UnityEngine.Timeline
@@ -244,12 +311,6 @@ ScriptsOnlyBuild:
     assemblyName: UnityEngine.UI.dll
     namespaceName: UnityEngine.UI
     className: RectMask2D
-  - hash:
-      serializedVersion: 2
-      Hash: 9252e731d50627c320de5ec37506196e
-    assemblyName: Assembly-CSharp.dll
-    namespaceName: 
-    className: TargetScheduler
   - hash:
       serializedVersion: 2
       Hash: 1103fb0758976355cdf9b7d5ce9cb7e0
@@ -306,10 +367,10 @@ ScriptsOnlyBuild:
     className: TMP_SpriteAsset
   - hash:
       serializedVersion: 2
-      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
+      Hash: a64d9853cdfdc37015de038e405b9785
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
-    className: EntryButtonController
+    className: enUIController
   - hash:
       serializedVersion: 2
       Hash: c3d3430df9e3ea95e3e3d587961390fb
@@ -334,12 +395,6 @@ ScriptsOnlyBuild:
     assemblyName: UnityEngine.UI.dll
     namespaceName: UnityEngine.UI
     className: ScrollRect
-  - hash:
-      serializedVersion: 2
-      Hash: f7b495c86500a878390b2f9fef1de5a8
-    assemblyName: Assembly-CSharp.dll
-    namespaceName: 
-    className: TrialController
   - hash:
       serializedVersion: 2
       Hash: c3d3430df9e3ea95e3e3d587961390fb
@@ -390,7 +445,13 @@ ScriptsOnlyBuild:
     className: stButtonController
   - hash:
       serializedVersion: 2
-      Hash: e9cfff449ba9cfec3b453a8502326c28
+      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: PublicLabFactors
+  - hash:
+      serializedVersion: 2
+      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: ClientController
@@ -450,10 +511,16 @@ ScriptsOnlyBuild:
     className: stTargetController
   - hash:
       serializedVersion: 2
-      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
+      Hash: b135691fee9676c43e5d9f7894b8fc56
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
-    className: lab1ButtonController
+    className: lab1UIController
+  - hash:
+      serializedVersion: 2
+      Hash: 9252e731d50627c320de5ec37506196e
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: lab1Target2Controller
   - hash:
       serializedVersion: 2
       Hash: 6939772cb3ce775a8e8d99f332534491
@@ -486,6 +553,12 @@ ScriptsOnlyBuild:
     className: MarkerTrack
   - hash:
       serializedVersion: 2
+      Hash: 807dd193b704499621ad9e63dcfc7a11
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: lab1TrialController
+  - hash:
+      serializedVersion: 2
       Hash: d791aa6007fa3640be1164ea75bb087d
     assemblyName: Unity.TextMeshPro.dll
     namespaceName: TMPro
@@ -516,6 +589,12 @@ ScriptsOnlyBuild:
     className: FileProcessor
   - hash:
       serializedVersion: 2
+      Hash: b3410d3211b3bd245f480b2774e3ada3
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: GlobalController
+  - hash:
+      serializedVersion: 2
       Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
     assemblyName: UnityEngine.TestRunner.dll
     namespaceName: UnityEngine.TestTools.TestRunner.Callbacks
@@ -532,6 +611,12 @@ ScriptsOnlyBuild:
     assemblyName: UnityEngine.UI.dll
     namespaceName: UnityEngine.UI
     className: Outline
+  - hash:
+      serializedVersion: 2
+      Hash: 0461d9172a2f14dcb17876ff650c020d
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: enPhaseController
   - hash:
       serializedVersion: 2
       Hash: a63fc1a3b035e5a0b5839cd7f7b3086e
@@ -600,5 +685,6 @@ ScriptsOnlyBuild:
     className: PlayableTrack
   platform: 13
   scenePathNames:
-  - Assets/Scenes/Lab1-tap.unity
+  - Assets/Scenes/Entry_scene.unity
+  - Assets/Scenes/Lab1_tap_33_33.unity
   playerPath: D:/WorkSpace/Unity Build/touch-client.apk

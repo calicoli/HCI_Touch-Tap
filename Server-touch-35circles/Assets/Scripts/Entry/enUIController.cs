@@ -4,37 +4,51 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using UnityEngine.UI;
-using static LabFactors;
+using static PublicLabFactors;
 
 
 public class enUIController : MonoBehaviour
 {
+    public Text debugText;
+
     public GameObject phaseController;
+    public Camera renderCamera;
 
     public InputField inputUserid;
     public Text txtUserid;
 
     public Dropdown dpLabOptions;
-    public Text txtLabName;
+    public Text txtLabInfo;
+
+    public Toggle tgLabMode;
+    public Text txtLabMode;
 
     public GameObject blockConditions;
     public Text txtBlockInfo;
     public Text txtCurrentBlockTitle, txtAngleInfo, txtAngleValid;
 
+    public Text txtServerip;
+
     public Button btnConfirmNameAndLab;
     public Button btnConfirmBlockCondition;
     public Button btnEnterLab;
 
+    private bool isConnecting;
+
+    private Color disconnectColor = new Color(0.8156f, 0.3529f, 0.4313f);
+    private Color connectColor = new Color(0f, 0f, 0f);
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        //txtLabName.text = "in " + ((LabScene)1).ToString();
     }
 
     // Update is called once per frame
     void Update()
     {
-        txtLabName.text = "in " + ((LabScene)1).ToString();
+        isConnecting = GlobalController.Instance.getConnectionStatus();
+        renderCamera.backgroundColor = (isConnecting ? connectColor : disconnectColor);
     }
 
     #region Public Method
@@ -42,12 +56,13 @@ public class enUIController : MonoBehaviour
     {
         inputUserid.gameObject.SetActive(!isInfoSet);
         dpLabOptions.gameObject.SetActive(!isInfoSet);
+        tgLabMode.gameObject.SetActive(!isInfoSet);
         btnConfirmNameAndLab.gameObject.SetActive(!isInfoSet);
-        txtLabName.gameObject.SetActive(isInfoSet);
+        txtLabInfo.gameObject.SetActive(isInfoSet);
         txtUserid.gameObject.SetActive(isInfoSet);
     }
 
-    public void setBlockInfoVibility(bool inPhase, bool isAngleVaild, bool isConditionConfirmed)
+    public void setBlockInfoVisibility(bool inPhase, bool isAngleVaild, bool isConditionConfirmed)
     {
         if(!inPhase)
         {
@@ -92,9 +107,9 @@ public class enUIController : MonoBehaviour
         txtCurrentBlockTitle.text = strBlockid;
     }
 
-    public void setAngleInfoContent(int angle)
+    public void setAngleInfoContent(float angle)
     {
-        string strAngle = angle.ToString();
+        string strAngle = Math.Round(angle).ToString();
         txtAngleInfo.text = "Current angle: " + strAngle + "°";
     }
     #endregion
@@ -103,17 +118,40 @@ public class enUIController : MonoBehaviour
 
     public void ConfirmUserAndLabInfo()
     {
-        // user info
-        int userid = int.Parse(inputUserid.text);
-        txtUserid.text = "Hi, user" + userid.ToString();
-        phaseController.GetComponent<enPhaseController>().setUserid(userid);
-        // lab info
-        int labid = dpLabOptions.value + 1;
-        LabScene labName = (LabScene)labid;
-        txtLabName.text = "in " + labName.ToString();
-        phaseController.GetComponent<enPhaseController>().setLabName(labName);
+        bool flag = GlobalController.Instance.getConnectionStatus();
+        if(flag)
+        {
+            // user info
+            int userid = int.Parse(inputUserid.text);
+            txtUserid.text = "Hi, user" + userid.ToString();
+            phaseController.GetComponent<enPhaseController>().setUserid(userid);
+            // lab mode
+            if (tgLabMode.isOn)
+            {
+                txtLabInfo.text = "in Full Mode" + Environment.NewLine;
+            } else
+            {
+                txtLabInfo.text = "in Test Mode" + Environment.NewLine;
+            }
+            // lab info
+            int labid = dpLabOptions.value + 1;
+            LabScene labName = (LabScene)labid;
+            txtLabInfo.text += "of " + labName.ToString();
+            phaseController.GetComponent<enPhaseController>().setLabInfo(labName, tgLabMode.isOn);
+            // move to next phase
+            phaseController.GetComponent<enPhaseController>().moveToPhase(WelcomePhase.assign_block_conditions);
+        }
+    }
 
-        phaseController.GetComponent<enPhaseController>().moveToPhase(WelcomePhase.assign_block_conditions);
+    public void ChangeLabModeText()
+    {
+        if(tgLabMode.isOn)
+        {
+            txtLabMode.text = "Full Mode";
+        } else
+        {
+            txtLabMode.text = "Test Mode";
+        }
     }
 
     public void ConfirmLabConditions()
@@ -123,7 +161,12 @@ public class enUIController : MonoBehaviour
 
     public void EnterSelectedLab()
     {
-        phaseController.GetComponent<enPhaseController>().moveToPhase(WelcomePhase.ready_to_enter_lab);
+        phaseController.GetComponent<enPhaseController>().moveToPhase(WelcomePhase.in_lab_scene);
+    }
+
+    public void setServerip()
+    {
+        txtServerip.text = GlobalController.Instance.serverip;
     }
     #endregion
 }

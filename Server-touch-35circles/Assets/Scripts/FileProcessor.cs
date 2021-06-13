@@ -11,13 +11,13 @@ public class FileProcessor : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        /*
         string filename = "filtProcessor.txt";
         string originText = readStringFromFile(filename);
         string writeText = originText + "\r\n" + originText + "\r\n";
         writeStringToFile(writeText, filename);
         string readText = readStringFromFile(filename);
-        Debug.Log(readText);
+        Debug.Log(readText);*/
         /*
         strWriteData = null;
         */
@@ -114,7 +114,7 @@ return null;
         string writeText = strContent;
         writeStringToFile(writeText, filename);
         string readText = readStringFromFile(filename);
-        Debug.Log(readText);
+        //Debug.Log(readText);
     }
 
     public void writeNewDataToFile(string filename, string strContent, out bool writeFinished)
@@ -124,7 +124,7 @@ return null;
         string writeText = strContent;
         writeStringToFile(writeText, filename);
         string readText = readStringFromFile(filename);
-        Debug.Log(readText);
+        //Debug.Log(readText);
 
         writeFinished = true;
     }
