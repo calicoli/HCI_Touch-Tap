@@ -14,10 +14,14 @@ public class PublicLabFactors : MonoBehaviour
     {
         in_entry_scene = 0,
         wait_for_input_information = 1,
-        assign_block_conditions = 2,
-        adjust_block_conditions = 3,
-        ready_to_enter_lab = 4,
-        in_lab_scene = 5,
+        check_client_scene = 2,
+        set_target_lab = 3,
+        assign_block_conditions = 4,
+        accept_acc_from_now = 5,
+        adjust_block_conditions = 6,
+        confirm_block_conditions = 7,
+        ready_to_enter_lab = 8,
+        in_lab_scene = 9,
     }
 
 

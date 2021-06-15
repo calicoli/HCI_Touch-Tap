@@ -589,7 +589,7 @@ ScriptsOnlyBuild:
     className: FileProcessor
   - hash:
       serializedVersion: 2
-      Hash: b3410d3211b3bd245f480b2774e3ada3
+      Hash: 075eb6b91c38398d882f786f9c04905c
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: GlobalController

@@ -13,18 +13,12 @@ public class enPhaseController : MonoBehaviour
 
     private WelcomePhase curPhase, prevPhase;
 
-    private ServerCommand curServerCmd;
-    private bool isExcutingCmd;
-    private int testnumber = 0;
-
     private bool updatedSceneToServer;
 
     // Start is called before the first frame update
     void Start()
     {
-        curServerCmd = PublicLabFactors.ServerCommand.no_server_command;
-        isExcutingCmd = false;
-
+        uiController.GetComponent<enUIController>().setStartUIInvisible();
         sender = GlobalController.Instance.client.GetComponent<ClientController>();
         GlobalController.Instance.curClientScene = LabScene.Entry_scene;
         updatedSceneToServer = false;
@@ -35,9 +29,7 @@ public class enPhaseController : MonoBehaviour
         }
 
         curPhase = GlobalController.Instance.curEntryPhase;
-        prevPhase = WelcomePhase.in_lab_scene;
-
-
+        prevPhase = WelcomePhase.out_entry_scene;
     }
 
     // Update is called once per frame
@@ -47,18 +39,6 @@ public class enPhaseController : MonoBehaviour
         {
             sender.prepareNewMessage4Server(MessageType.Scene);
             updatedSceneToServer = true;
-        }
-
-
-        if (curServerCmd == ServerCommand.no_server_command
-            && !isExcutingCmd 
-            && GlobalController.Instance.serverCmdQueue.Count > 0)
-        {
-            isExcutingCmd = true;
-            curServerCmd = GlobalController.Instance.serverCmdQueue.Dequeue();
-            testnumber++;
-            Debug.Log("C excute: " + testnumber.ToString()+ curServerCmd.ToString());
-            
         }
         
         uiController.GetComponent<enUIController>().debugText.text = curPhase.ToString();
@@ -91,22 +71,27 @@ public class enPhaseController : MonoBehaviour
         }
         else if (curPhase == WelcomePhase.wait_for_server_set_lab)
         {
-            if (curServerCmd == ServerCommand.server_set_target_lab)
+            if (GlobalController.Instance.serverCmdQueue.Count != 0 && 
+                GlobalController.Instance.serverCmdQueue.Peek() == ServerCommand.server_set_target_lab)
             {
                 uiController.GetComponent<enUIController>().setLabInfoVisibility(true, true);
                 finishCurrentServerCmdExcution();
-                GlobalController.Instance.serverHaveSetLab = true;
-                switchPhase(WelcomePhase.wait_for_server_accept_acc);
+                GlobalController.Instance.isLabInfoSet = true;
+                switchPhase(WelcomePhase.check_server_scene);
             }
-            if (GlobalController.Instance.serverHaveSetLab)
+        }
+        else if(curPhase == WelcomePhase.check_server_scene)
+        {
+            uiController.GetComponent<enUIController>().setLabInfoVisibility(true, true);
+            if (GlobalController.Instance.curServerScene == LabScene.Entry_scene)
             {
-                uiController.GetComponent<enUIController>().setLabInfoVisibility(true, true);
                 switchPhase(WelcomePhase.wait_for_server_accept_acc);
             }
         }
         else if (curPhase == WelcomePhase.wait_for_server_accept_acc)
         {
-            if (curServerCmd == ServerCommand.server_begin_to_receive_acc)
+            if (GlobalController.Instance.serverCmdQueue.Count != 0 && 
+                GlobalController.Instance.serverCmdQueue.Peek() == ServerCommand.server_begin_to_receive_acc)
             {
                 finishCurrentServerCmdExcution();
                 switchPhase(WelcomePhase.deliver_angle_info);
@@ -115,7 +100,8 @@ public class enPhaseController : MonoBehaviour
         else if (curPhase == WelcomePhase.deliver_angle_info)
         {
             GlobalController.Instance.setAngleDetectStatus(true);
-            if (curServerCmd == ServerCommand.server_confirm_block_conditions)
+            if (GlobalController.Instance.serverCmdQueue.Count != 0 &&
+                GlobalController.Instance.serverCmdQueue.Peek() == ServerCommand.server_confirm_block_conditions)
             {
                 finishCurrentServerCmdExcution();
                 GlobalController.Instance.setAngleDetectStatus(false);
@@ -124,12 +110,14 @@ public class enPhaseController : MonoBehaviour
         }
         else if (curPhase == WelcomePhase.ready_to_enter_lab)
         {
-            if (curServerCmd == ServerCommand.server_say_enter_lab)
+            if (GlobalController.Instance.serverCmdQueue.Count != 0 && 
+                GlobalController.Instance.serverCmdQueue.Peek() == ServerCommand.server_say_enter_lab)
             {
-                switchPhase(WelcomePhase.in_lab_scene);
+                finishCurrentServerCmdExcution();
+                switchPhase(WelcomePhase.out_entry_scene);
             }
         }
-        else if (curPhase == WelcomePhase.in_lab_scene)
+        else if (curPhase == WelcomePhase.out_entry_scene)
         {
             SceneManager.LoadScene(GlobalController.Instance.getTargetLabName());
         }
@@ -137,16 +125,13 @@ public class enPhaseController : MonoBehaviour
 
     private void switchPhase(WelcomePhase wp)
     {
-        GlobalController.Instance.curEntryPhase = wp;
         curPhase = wp;
     }
 
     private void finishCurrentServerCmdExcution()
     {
-        testnumber++;
-        Debug.Log("C finish: " + testnumber.ToString() + curServerCmd.ToString());
-        curServerCmd = ServerCommand.no_server_command;
-        isExcutingCmd = false;
+        ServerCommand sc = GlobalController.Instance.serverCmdQueue.Dequeue();
+        Debug.Log("C excuted: " + sc.ToString());
     }
 
 

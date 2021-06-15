@@ -26,6 +26,8 @@ public class GlobalController : MonoBehaviour
     public Vector3 accClient;
     [HideInInspector]
     public float curAngle;
+    [HideInInspector]
+    public bool isUserLabInfoSet;
 
     [HideInInspector]
     public ServerCommand curServerCommand;
@@ -72,6 +74,7 @@ public class GlobalController : MonoBehaviour
             curClientScene = LabScene.Entry_scene;
             curBlockid = trial_start_index;
             curEntryPhase = WelcomePhase.in_entry_scene;
+            isUserLabInfoSet = false;
         }
         else if (Instance != null)
         {
@@ -158,8 +161,8 @@ public class GlobalController : MonoBehaviour
         curBlockCondition = conBlocks[curBlockid];
 
         server.GetComponent<ServerController>().prepareNewMessage4Client(MessageType.Command, ServerCommand.server_say_exit_lab);
-        curEntryPhase = WelcomePhase.assign_block_conditions;
-        string entrySceneName = ((LabScene)0).ToString();
+        curEntryPhase = WelcomePhase.check_client_scene;
+        string entrySceneName = (LabScene.Entry_scene).ToString();
         SceneManager.LoadScene(entrySceneName);
     }
 

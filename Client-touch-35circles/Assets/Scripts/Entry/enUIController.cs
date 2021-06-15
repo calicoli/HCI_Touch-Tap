@@ -60,7 +60,11 @@ public class enUIController : MonoBehaviour
         string serverip = inputServerip.text;
         phaseController.GetComponent<enPhaseController>().tryToConnectServer(serverip);
     }
-
+    public void setStartUIInvisible()
+    {
+        setConnectionInfoVisibility(GlobalController.Instance.getConnectionStatus());
+        setLabInfoVisibility(GlobalController.Instance.getConnectionStatus(), GlobalController.Instance.isLabInfoSet);
+    }
     #endregion
 
 }
