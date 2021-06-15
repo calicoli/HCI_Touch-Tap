@@ -445,7 +445,7 @@ ScriptsOnlyBuild:
     className: SignalTrack
   - hash:
       serializedVersion: 2
-      Hash: 84b668cec990696537521dc369d9ea17
+      Hash: c934557c73edaad207bd5c96fdea9206
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: GlobalController

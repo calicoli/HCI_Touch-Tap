@@ -10,18 +10,20 @@ public class AngleProcessor : MonoBehaviour
     private Vector3 accOther;
 
     private bool inReceivingAccStatus;
+    private bool inTrial;
 
     // Start is called before the first frame update
     void Start()
     {
+        inTrial = false;
+        inReceivingAccStatus = false;
         angle = defaultAngle;
-        //Debug.Log(GlobalController.Instance.userid);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (inReceivingAccStatus)
+        if (inReceivingAccStatus || inTrial)
         {
             accThis = Input.acceleration;
             accThis.y = 0f;
@@ -37,6 +39,11 @@ public class AngleProcessor : MonoBehaviour
             {
                 GlobalController.Instance.curAngle = 180 + angle;
             }
+
+            if(inTrial)
+            {
+                inTrial = false;
+            }
         }
         else
         {
@@ -49,5 +56,10 @@ public class AngleProcessor : MonoBehaviour
     public void setReceivingAccStatus(bool open)
     {
         inReceivingAccStatus = open;
+    }
+
+    public void setTrialStatus(bool open)
+    {
+        inTrial = open;
     }
 }

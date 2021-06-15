@@ -14,17 +14,17 @@ public class lab1PhaseController : MonoBehaviour
 
     private Lab1Phase curPhase, prevPhase;
 
-    private PublicLabFactors.ServerCommand curServerCmd;
-    private bool isExcutingCmd;
-    private int testnumber = 0;
+    //private PublicLabFactors.ServerCommand curServerCmd;
+    //private bool isExcutingCmd;
+    //private int testnumber = 0;
 
     private bool updatedSceneToServer;
 
     // Start is called before the first frame update
     void Start()
     {
-        curServerCmd = PublicLabFactors.ServerCommand.no_server_command;
-        isExcutingCmd = false;
+        //curServerCmd = PublicLabFactors.ServerCommand.no_server_command;
+        //isExcutingCmd = false;
 
         sender = GlobalController.Instance.client.GetComponent<ClientController>();
         GlobalController.Instance.curClientScene = PublicLabFactors.LabScene.Lab1_tap_33_33;
@@ -45,17 +45,6 @@ public class lab1PhaseController : MonoBehaviour
         {
             sender.prepareNewMessage4Server(PublicLabFactors.MessageType.Scene);
             updatedSceneToServer = true;
-        }
-
-        if (curServerCmd == PublicLabFactors.ServerCommand.no_server_command
-            && !isExcutingCmd
-            && GlobalController.Instance.serverCmdQueue.Count > 0)
-        {
-            isExcutingCmd = true;
-            curServerCmd = GlobalController.Instance.serverCmdQueue.Dequeue();
-            testnumber++;
-            Debug.Log("C excute: " + testnumber.ToString() + curServerCmd.ToString());
-
         }
 
         if(curPhase != prevPhase)
@@ -96,11 +85,13 @@ public class lab1PhaseController : MonoBehaviour
         }
         else if (curPhase == Lab1Phase.wait_to_back_to_entry)
         {
-            if (curServerCmd == PublicLabFactors.ServerCommand.server_say_exit_lab)
+            if (GlobalController.Instance.serverCmdQueue.Count != 0 && 
+                GlobalController.Instance.serverCmdQueue.Peek() == PublicLabFactors.ServerCommand.server_say_exit_lab)
             {
                 finishCurrentServerCmdExcution();
                 switchPhase(Lab1Phase.out_lab1_scene);
-            } else if(curServerCmd == PublicLabFactors.ServerCommand.server_say_end_lab)
+            } else if(GlobalController.Instance.serverCmdQueue.Count != 0 && 
+                GlobalController.Instance.serverCmdQueue.Peek() == PublicLabFactors.ServerCommand.server_say_end_lab)
             {
                 finishCurrentServerCmdExcution();
                 uiController.GetComponent<lab1UIController>().ShowTheEndText();
@@ -108,9 +99,9 @@ public class lab1PhaseController : MonoBehaviour
         }
         else if (curPhase == Lab1Phase.out_lab1_scene)
         {
-            GlobalController.Instance.curEntryPhase = PublicLabFactors.WelcomePhase.detect_connect_status;
+            GlobalController.Instance.curEntryPhase = PublicLabFactors.WelcomePhase.check_server_scene;
             Debug.Log("lab1Phase: back to entry scene soon");
-            string entrySceneName = ((PublicLabFactors.LabScene)0).ToString();
+            string entrySceneName = (PublicLabFactors.LabScene.Entry_scene).ToString();
             SceneManager.LoadScene(entrySceneName);
         }
     }
@@ -123,10 +114,8 @@ public class lab1PhaseController : MonoBehaviour
 
     private void finishCurrentServerCmdExcution()
     {
-        testnumber++;
-        Debug.Log("C finish: " + testnumber.ToString() + curServerCmd.ToString());
-        curServerCmd = PublicLabFactors.ServerCommand.no_server_command;
-        isExcutingCmd = false;
+        PublicLabFactors.ServerCommand sc = GlobalController.Instance.serverCmdQueue.Dequeue();
+        Debug.Log("C excuted: " + sc.ToString());
     }
 
     #region Public Method

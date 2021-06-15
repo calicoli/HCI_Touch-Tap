@@ -17,8 +17,6 @@ public class GlobalController : MonoBehaviour
     // entry params
     [HideInInspector]
     public string serverip;
-    [HideInInspector]
-    public bool serverHaveSetLab;
 
     [HideInInspector]
     public Queue<ServerCommand> serverCmdQueue;
@@ -34,6 +32,8 @@ public class GlobalController : MonoBehaviour
     // entry params
     [HideInInspector]
     public WelcomePhase curEntryPhase;
+    [HideInInspector]
+    public bool isLabInfoSet;
 
     // lab1 params
     [HideInInspector]
@@ -61,7 +61,8 @@ public class GlobalController : MonoBehaviour
             curClientScene = LabScene.Entry_scene;
             serverCmdQueue = new Queue<ServerCommand>();
             curEntryPhase = WelcomePhase.in_entry_scene;
-            serverHaveSetLab = false;
+            isLabInfoSet = false;
+            isConnecting = false;
         }
         else if (Instance != null)
         {

@@ -163,6 +163,9 @@ public class ServerController : MonoBehaviour
             Convert.ToSingle(messages[2]),
             Convert.ToSingle(messages[3]));
 
+        GlobalController.Instance.accClient = cAcc;
+        GlobalController.Instance.angleProcessor.GetComponent<AngleProcessor>().setTrialStatus(true);
+
         int cTrialIndex = Convert.ToInt32(messages[4]);
         int cRepeatIndex = Convert.ToInt32(messages[5]);
         int cTarget2id = Convert.ToInt32(messages[6]);

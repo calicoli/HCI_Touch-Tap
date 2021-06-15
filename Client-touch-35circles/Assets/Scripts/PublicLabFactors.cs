@@ -16,10 +16,11 @@ public class PublicLabFactors : MonoBehaviour
         wait_for_input_serverip = 1,
         detect_connect_status = 2,
         wait_for_server_set_lab = 3,
-        wait_for_server_accept_acc = 4,
-        deliver_angle_info = 5,
-        ready_to_enter_lab = 6,
-        in_lab_scene = 7
+        check_server_scene = 4,
+        wait_for_server_accept_acc = 5,
+        deliver_angle_info = 6,
+        ready_to_enter_lab = 7,
+        out_entry_scene = 8
     }
 
     public enum LabScene
@@ -48,6 +49,18 @@ public class PublicLabFactors : MonoBehaviour
         server_say_exit_lab = 5,
         server_say_end_lab = 6,
     }
+
+    /*
+    public static Dictionary<ServerCommand, LabScene> MapScmdScene =
+        new Dictionary<ServerCommand, LabScene>()
+        {
+            {ServerCommand.server_set_target_lab, LabScene.Entry_scene },
+            {ServerCommand.server_begin_to_receive_acc, LabScene.Entry_scene },
+            {ServerCommand.server_confirm_block_conditions, LabScene.Entry_scene },
+            {ServerCommand.server_say_enter_lab, LabScene.Entry_scene },
+            {ServerCommand.server_say_exit_lab, LabScene.Lab1_tap_33_33 },
+            {ServerCommand.server_say_end_lab, LabScene.Lab1_tap_33_33 },
+        };*/
 
     public enum ClientCommand
     {
