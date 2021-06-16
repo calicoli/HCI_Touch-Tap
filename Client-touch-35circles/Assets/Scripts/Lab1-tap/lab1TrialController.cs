@@ -20,7 +20,7 @@ public class lab1TrialController : MonoBehaviour
     private bool haveObjectOnScreen;
 
     private Trial curTrial;
-    private TrialData trialData;
+    private TrialDataWithLocalTime trialData;
 
     // Start is called before the first frame update
     void Start()
@@ -65,9 +65,9 @@ public class lab1TrialController : MonoBehaviour
                     curRepeateTime = GlobalController.Instance.curLab1Repeateid;
                     curTrialIndex = GlobalController.Instance.curLab1Trialid;
                     curTrial = GlobalController.Instance.curLab1Trial;
-                    trialData = new TrialData();
+                    trialData = new TrialDataWithLocalTime();
                     trialData.init(curTrial.index, curTrial.secondid);
-                    trialData.clientReceivedDataStamp = tmpTime;
+                    trialData.localTime.clientReceiveDataStamp = tmpTime;
                 } else if (curTrialPhase == TrialPhase.block_end)
                 {
                     // wait
@@ -84,7 +84,7 @@ public class lab1TrialController : MonoBehaviour
                 if (!haveObjectOnScreen)
                 {
                     target2Controller.GetComponent<lab1Target2Controller>().updateTarget2OnScreen(curTrial.secondid);
-                    trialData.t2ShowupStamp = CurrentTimeMillis();
+                    trialData.localTime.t2ShowupStamp = CurrentTimeMillis();
                     haveObjectOnScreen = true;
                 }
 #if UNITY_ANDROID && UNITY_EDITOR
@@ -94,7 +94,7 @@ public class lab1TrialController : MonoBehaviour
                     bool touchSuccess = process1Touch4Target2(Input.mousePosition, curTrial.secondid);
                     if (touchSuccess)
                     {
-                        trialData.tp2SuccessStamp = CurrentTimeMillis();
+                        trialData.localTime.tp2SuccessStamp = CurrentTimeMillis();
                         trialData.tp2SuccessPosition = Input.mousePosition;
                         target2Controller.GetComponent<lab1Target2Controller>().
                             updateTarget2TouchedStatus(curTrial.secondid);
@@ -118,7 +118,7 @@ public class lab1TrialController : MonoBehaviour
                         bool touchSuccess = process1Touch4Target2(touch.position, curTrial.secondid);
                         if (touchSuccess)
                         {
-                            trialData.tp2SuccessStamp = CurrentTimeMillis();
+                            trialData.localTime.tp2SuccessStamp = CurrentTimeMillis();
                             trialData.tp2SuccessPosition = touch.position;
                             target2Controller.GetComponent<lab1Target2Controller>().updateTarget2TouchedStatus(curTrial.secondid);
                             haveObjectOnScreen = false;
@@ -134,8 +134,8 @@ public class lab1TrialController : MonoBehaviour
             }
             else if (curTrialPhase == TrialPhase.a_trial_ongoing_p2)
             {
-                trialData.clientSendDataStamp = CurrentTimeMillis();
-                GlobalController.Instance.curTrialData = trialData;
+                trialData.localTime.clientSendDataStamp = CurrentTimeMillis();
+                GlobalController.Instance.curLab1TrialData = trialData;
                 sender.GetComponent<ClientController>().
                     prepareNewMessage4Server(PublicLabFactors.MessageType.Trial);
                 curTrialPhase = TrialPhase.a_trial_ongoing_p3;
