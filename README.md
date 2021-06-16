@@ -17,7 +17,7 @@
 - Client device: input Server IP (showed on the bottom of server screen)
 - Client decive: tap "Connect" button
 - Both device turns to black background if connected successfully
-2. Input user and lab info
+2. Input user and lab infomation
 - Server device: input User ID
 - Server device: choose target lab
 - Server device: choose lab mode
