@@ -25,8 +25,6 @@ public class lab1TrialController : MonoBehaviour
     private TrialSequence curSequence;
     private Trial curTrial;
 
-    //private TrialData trialData;
-
     // Start is called before the first frame update
     void Start()
     {
@@ -113,7 +111,7 @@ public class lab1TrialController : MonoBehaviour
                 GlobalController.Instance.curLab1Trial = curTrial;
 
                 // set trial data
-                GlobalController.Instance.curLab1TrialData = new TrialData();
+                GlobalController.Instance.curLab1TrialData = new TrialDataWithLocalTime();
                 GlobalController.Instance.curLab1TrialData.init(curTrial.index, curTrial.firstid, curTrial.secondid);
                 int bid = GlobalController.Instance.curBlockid;
                 int rid = curRepeateTime;
@@ -129,7 +127,7 @@ public class lab1TrialController : MonoBehaviour
                 if(!haveObjectOnScreen)
                 { 
                     target1Controller.GetComponent<lab1Target1Controller>().updateTarget1OnScreen(curTrial.firstid);
-                    GlobalController.Instance.curLab1TrialData.t1ShowupStamp = CurrentTimeMillis();
+                    GlobalController.Instance.curLab1TrialData.localTime.t1ShowupStamp = CurrentTimeMillis();
                     haveObjectOnScreen = true;
                 }
 #if UNITY_ANDROID && UNITY_EDITOR
@@ -139,7 +137,7 @@ public class lab1TrialController : MonoBehaviour
                     bool touchSuccess = process1Touch4Target1(Input.mousePosition, curTrial.firstid);
                     if (touchSuccess)
                     {
-                        GlobalController.Instance.curLab1TrialData.tp1SuccessStamp = CurrentTimeMillis();
+                        GlobalController.Instance.curLab1TrialData.localTime.tp1SuccessStamp = CurrentTimeMillis();
                         GlobalController.Instance.curLab1TrialData.tp1SuccessPosition = Input.mousePosition;
                         target1Controller.GetComponent<lab1Target1Controller>().
                             updateTarget1TouchedStatus(curTrial.firstid);
@@ -163,7 +161,7 @@ public class lab1TrialController : MonoBehaviour
                         bool touchSuccess = process1Touch4Target1(touch.position, curTrial.firstid);
                         if (touchSuccess)
                         {
-                            GlobalController.Instance.curLab1TrialData.tp1SuccessStamp = CurrentTimeMillis();
+                            GlobalController.Instance.curLab1TrialData.localTime.tp1SuccessStamp = CurrentTimeMillis();
                             GlobalController.Instance.curLab1TrialData.tp1SuccessPosition = touch.position;
                             target1Controller.GetComponent<lab1Target1Controller>().updateTarget1TouchedStatus(curTrial.firstid);
                             haveObjectOnScreen = false;
@@ -180,7 +178,7 @@ public class lab1TrialController : MonoBehaviour
             else if(curTrialPhase == TrialPhase.a_trial_ongoing_p1)
             {
                 // send command to client to display target-2
-                GlobalController.Instance.curLab1TrialData.serverSendDataStamp = CurrentTimeMillis();
+                GlobalController.Instance.curLab1TrialData.localTime.serverSendDataStamp = CurrentTimeMillis();
                 sender.GetComponent<ServerController>().
                     prepareNewMessage4Client(PublicLabFactors.MessageType.Trial);
                 curTrialPhase = TrialPhase.a_trial_ongoing_p2;
@@ -190,7 +188,7 @@ public class lab1TrialController : MonoBehaviour
                 clientSaidMoveon = GlobalController.Instance.clientRefreshedTrialData;
                 if(isConnecting && clientSaidMoveon)
                 {
-                    GlobalController.Instance.curLab1TrialData.serverReceivedDataStamp = CurrentTimeMillis();
+                    GlobalController.Instance.curLab1TrialData.localTime.serverReceiveDataStamp = CurrentTimeMillis();
                     clientSaidMoveon = false;
                     GlobalController.Instance.clientRefreshedTrialData = false;
                     curTrialPhase = TrialPhase.a_trial_ongoing_p3;

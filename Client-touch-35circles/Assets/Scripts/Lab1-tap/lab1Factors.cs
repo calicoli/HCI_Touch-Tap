@@ -60,6 +60,62 @@ public class lab1Factors : MonoBehaviour
         }
     }
 
+    public struct LocalTime
+    {
+        public long t2ShowupStamp, tp2SuccessStamp;                 // client
+        public long clientReceiveDataStamp, clientSendDataStamp;    // client
+    }
+
+    public struct TrialDataWithLocalTime
+    {
+        // assgin
+        int trialid, secondid;
+        public int tp2Count;
+        
+        public Vector2 tp2SuccessPosition;
+        public ArrayList tp2FailPositions;
+        public LocalTime localTime;
+
+        public void init(int idx, int id2)
+        {
+            trialid = idx;
+            secondid = id2;
+            tp2Count = 0;
+            tp2FailPositions = new ArrayList();
+            tp2FailPositions.Clear();
+            localTime = new LocalTime();
+        }
+
+        public string getAllData()
+        {
+            Debug.Log("Part data: " + tp2Count.ToString());
+            string str;
+            str = trialid.ToString() + "#" + secondid.ToString() + "#"
+                + localTime.clientReceiveDataStamp + "#"
+                + localTime.clientSendDataStamp + "#"
+                + tp2Count.ToString() + "#" 
+                + localTime.t2ShowupStamp.ToString() + "#"
+                + localTime.tp2SuccessStamp.ToString() + "#"
+                + tp2SuccessPosition.x.ToString() + "#"
+                + tp2SuccessPosition.y.ToString() + "#"
+                ;
+            if (tp2Count > 1)
+            {
+                for (int i = 0; i < tp2FailPositions.Count; i++)
+                {
+                    str += tp2FailPositions[i].ToString() + "*";
+                }
+            }
+            else
+            {
+                str += " ";
+            }
+            str += "#";
+            Debug.Log("cTrialData: " + str);
+            return str;
+        }
+    }
+
     public struct TrialData
     {
         // assgin

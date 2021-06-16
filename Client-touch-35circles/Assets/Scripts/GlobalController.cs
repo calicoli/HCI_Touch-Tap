@@ -45,7 +45,7 @@ public class GlobalController : MonoBehaviour
     [HideInInspector]
     public lab1Factors.TrialPhase curLab1TrialPhase;
     [HideInInspector]
-    public lab1Factors.TrialData curTrialData;
+    public lab1Factors.TrialDataWithLocalTime curLab1TrialData;
     [HideInInspector]
     public bool serverRefreshTrialData;
 
@@ -122,6 +122,6 @@ public class GlobalController : MonoBehaviour
 
     public string getTrialData4Server()
     {
-        return curTrialData.getAllData();
+        return curLab1TrialData.getAllData();
     }
 }

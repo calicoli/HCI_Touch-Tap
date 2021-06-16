@@ -57,7 +57,7 @@ public class GlobalController : MonoBehaviour
     public bool clientRefreshedTrialData;
     [HideInInspector]
     public lab1Factors.TrialSequence curLab1TrialSequence;
-    public lab1Factors.TrialData curLab1TrialData;
+    public lab1Factors.TrialDataWithLocalTime curLab1TrialData;
 
     private bool isConnecting;
     
@@ -209,11 +209,11 @@ public class GlobalController : MonoBehaviour
         string[] messages = cTouchMsg.Split('#');
         int cTrialIndex = Convert.ToInt32(messages[0]);
         int cTarget2id = Convert.ToInt32(messages[1]);
-        curLab1TrialData.clientReceivedDataStamp = Convert.ToInt64(messages[2]);
-        curLab1TrialData.clientSendDataStamp = Convert.ToInt64(messages[3]);
+        curLab1TrialData.localTime.clientReceiveDataStamp = Convert.ToInt64(messages[2]);
+        curLab1TrialData.localTime.clientSendDataStamp = Convert.ToInt64(messages[3]);
         curLab1TrialData.tp2Count = Convert.ToInt32(messages[4]);
-        curLab1TrialData.t2ShowupStamp = Convert.ToInt64(messages[5]);
-        curLab1TrialData.tp2SuccessStamp = Convert.ToInt64(messages[6]);
+        curLab1TrialData.localTime.t2ShowupStamp = Convert.ToInt64(messages[5]);
+        curLab1TrialData.localTime.tp2SuccessStamp = Convert.ToInt64(messages[6]);
         curLab1TrialData.tp2SuccessPosition =
             new Vector2(Convert.ToSingle(messages[7]), Convert.ToSingle(messages[8]));
         curLab1TrialData.tp2FailPositions = messages[9];
