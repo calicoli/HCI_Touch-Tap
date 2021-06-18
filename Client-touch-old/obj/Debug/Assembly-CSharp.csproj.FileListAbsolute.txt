@@ -1,2 +1,0 @@
-F:\GitHub\HCI_Touch\Server-touch\obj\Debug\Assembly-CSharp.csprojAssemblyReference.cache
-F:\GitHub\HCI_Touch\Server-touch\obj\Debug\Assembly-CSharp.csproj.CoreCompileInputs.cache
