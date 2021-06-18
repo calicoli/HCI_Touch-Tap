@@ -2,12 +2,19 @@
 
 ## Selective options
 1. Lab options
-- Lab1-3×3 (available)
-- Lab2-5×7 (not available now)
-2. Lab modes
+- Lab0-5×5 (available)
+- Lab1-9×9 (available)
+- Lab2-35×35 (not available now)
+3. Lab modes
 - Full mode (available)
-  - Lab1-3×3: contain 81 trials per block
+  - Lab0-5×5: contain 25 trials per block
+  - Lab1-9×9: contain 81 trials per block
 - Test mode (available)
+  - show the following information on the screen
+    - Block ID - Repeate ID - Trial ID
+    - (target-1 pos, target-2 pos)
+    - Current angle
+  - Lab0-5×5: contain 25 trials per block
   - Lab1-3×3: contain 5 trials per block
 
 ## How to use
