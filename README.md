@@ -1,4 +1,4 @@
-# HCI_Touch
+# HCI_Touch-Tap
 
 ## Selective options
 1. Lab options
