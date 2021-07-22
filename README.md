@@ -5,7 +5,7 @@
 - Lab0-5×5 (available)
 - Lab1-9×9 (available)
 - Lab2-35×35 (not available now)
-3. Lab modes
+2. Lab modes
 - Full mode (available)
   - Lab0-5×5: contain 25 trials per block
   - Lab1-9×9: contain 81 trials per block
