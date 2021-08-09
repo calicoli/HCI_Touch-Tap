@@ -6,6 +6,17 @@ using static PublicLabFactors;
 
 public class PublicBlockFactors : MonoBehaviour
 {
+    static int[ , ] permutation_4_element = {
+        { 0, 1, 2, 3},
+        { 1, 0, 2, 3},
+        { 0, 2, 1, 3},
+        { 0, 1, 3, 2},
+        { 2, 1, 0, 3},
+        { 0, 3, 2, 1},
+        { 3, 1, 2, 0},
+    };
+
+
     public struct BlockSequence
     {
         LabScene labName;
@@ -102,7 +113,7 @@ public class PublicBlockFactors : MonoBehaviour
 
         private void setLab0Sequance(int userid)
         {
-            ArrayList tmpPosture = getPostureSequence(Enum.GetNames(typeof(Lab0_tap_55.Posture)).Length),
+            ArrayList tmpPosture = getPostureSequence(userid, Enum.GetNames(typeof(Lab0_tap_55.Posture)).Length),
                       tmpAngle = getDoubleAngleSequenceWithUserid(userid, Lab0_tap_55.AngleBetweenScreens.Length),
                       tmpOrientation = getFirstOrientationSequenceWithUserid(userid, Enum.GetNames(typeof(Lab0_tap_55.Orientation)).Length);
             ArrayList quadrupleAngle = getPalindromeArrayList(tmpAngle),
@@ -127,7 +138,7 @@ public class PublicBlockFactors : MonoBehaviour
         }
         private void setLab1Sequance(int userid)
         {
-            ArrayList tmpPosture = getPostureSequence(Enum.GetNames(typeof(Lab1_tap_99.Posture)).Length),
+            ArrayList tmpPosture = getPostureSequence(userid, Enum.GetNames(typeof(Lab1_tap_99.Posture)).Length),
                       tmpAngle = getDoubleAngleSequenceWithUserid(userid,Lab1_tap_99.AngleBetweenScreens.Length),
                       tmpOrientation = getFirstOrientationSequenceWithUserid(userid, Enum.GetNames(typeof(Lab1_tap_99.Orientation)).Length);
             ArrayList quadrupleAngle = getPalindromeArrayList(tmpAngle),
@@ -151,12 +162,14 @@ public class PublicBlockFactors : MonoBehaviour
             }
         }
 
-        private ArrayList getPostureSequence(int lenPosture)
+        private ArrayList getPostureSequence(int userid, int lenPosture)
         {
             ArrayList postures = new ArrayList();
             postures = randomSequence(lenPosture);
             return postures;
         }
+
+
         private ArrayList getDoubleAngleSequenceWithUserid(int userid, int lenAngle)
         {
             ArrayList angles = new ArrayList();

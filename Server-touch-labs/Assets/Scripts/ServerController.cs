@@ -189,8 +189,8 @@ public class ServerController : MonoBehaviour
             string msgContent = msgType.ToString() + paramSeperators + cmd.ToString() + paramSeperators;
             sendMessage(msgContent);
         }
-        
     }
+
     public void prepareNewMessage4Client(MessageType msgType)
     {
         string msgContent = "";
